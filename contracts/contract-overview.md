@@ -2,7 +2,6 @@
 
 All Brimdex contracts are deployed on the **Somnia Testnet**.
 
-
 ## Addresses
 
 | Contract | Address |
@@ -16,7 +15,6 @@ All Brimdex contracts are deployed on the **Somnia Testnet**.
 
 > Markets and vaults are deployed per-market via `BrimdexFactory`. Use `factory.getAllMarkets()` to enumerate them.
 
-
 ## Network details
 
 | Property | Value |
@@ -26,7 +24,6 @@ All Brimdex contracts are deployed on the **Somnia Testnet**.
 | RPC | `https://dream-rpc.somnia.network` |
 | Explorer | `https://shannon-explorer.somnia.network` |
 | Currency | STT |
-
 
 ## Architecture diagram
 
@@ -43,7 +40,6 @@ User
  └── BrimdexOrderBook ──────────── BOUND / BREAK tokens
           (peer-to-peer)
 ```
-
 
 ## Contract pages
 

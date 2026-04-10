@@ -1,6 +1,6 @@
 # Brimdex Docs
 
-[🌐 brimdex](https://brimdex.markets) · [𝕏 brimdex](https://twitter.com/brimdex) · [✈️ Telegram](https://t.me/brimdex) · [📦 GitHub](https://github.com/deeakpan/Brimdex-contracts) · [🎨 Brand Assets](https://github.com/deeakpan/brimdex-docs/tree/main/brimdex_asset_pack)
+[🌐 brimdex](https://brimdex.markets) · [𝕏 brimdex](https://twitter.com/brimdex) · [✈️ Telegram](https://t.me/brimdex) · [📦 GitHub](https://github.com/deeakpan/Brimdex-contracts) · [🎨 Brand Assets](brand-assets.md)
 
 ---
 
@@ -12,7 +12,7 @@
 
 ## Key Concepts
 
-- [Key Concepts](key-concepts/README.md)
+- [Key Concepts](key-concepts/key-concepts-overview.md)
 - [Prices](key-concepts/prices.md)
 - [Positions & Tokens](key-concepts/positions-and-tokens.md)
 - [The Orderbook](key-concepts/orderbook.md)
@@ -20,7 +20,7 @@
 
 ## How It Works
 
-- [How It Works](how-it-works/README.md)
+- [How It Works](how-it-works/how-it-works-overview.md)
 - [Trading](how-it-works/trading.md)
 - [Hedging](how-it-works/hedging.md)
 - [Liquidity Providing](how-it-works/liquidity-providing.md)
@@ -29,7 +29,7 @@
 
 ## Contracts
 
-- [Contract Overview & Addresses](contracts/README.md)
+- [Contract Overview & Addresses](contracts/contract-overview.md)
 - [BrimdexMarket](contracts/brimdex-market.md)
 - [BrimdexFactory](contracts/brimdex-factory.md)
 - [BrimdexOrderBook](contracts/brimdex-orderbook.md)
@@ -38,7 +38,7 @@
 
 ## Builders
 
-- [Builder Overview](builders/README.md)
+- [Builder Overview](builders/builder-overview.md)
 - [Fetching Markets](builders/fetching-markets.md)
 - [Trading via Contract](builders/trading.md)
 - [Reading Positions](builders/reading-positions.md)

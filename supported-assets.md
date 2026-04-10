@@ -6,9 +6,11 @@ Brimdex uses `BrimdexFeeds` — an onchain oracle contract that stores price dat
 
 | Feed Name | Asset | Decimals |
 |---|---|---|
-| `BTC/USD` | Bitcoin | 6 |
+| `SOL/USD` | Solana | 6 |
 | `ETH/USD` | Ethereum | 6 |
-| `STT/USD` | Somnia Token | 6 |
+| `BTC/USD` | Bitcoin | 6 |
+| `SOMI/USD` | Somnia | 6 |
+| `BNB/USD` | BNB | 6 |
 
 ## How feeds work
 
