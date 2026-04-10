@@ -43,7 +43,7 @@ See [Prices](key-concepts/prices.md) for the full math.
 
 ## What is seed liquidity?
 
-Both pools start with equal USDC — deposited by Liquidity Providers (LPs) via the `MarketLiquidityVault`. This seed ensures the market has a 50/50 starting price and prevents zero-liquidity edge cases.
+Both pools start with equal USDC — deposited by liquidity providers (LPs) through the **per-market LP vault** in the app. This seed ensures the market has a 50/50 starting price and prevents zero-liquidity edge cases.
 
 LPs do **not** take a directional bet. Their principal is returned at settlement regardless of outcome. In return they earn **0.2% of every trade** that flows through the market.
 
@@ -52,14 +52,14 @@ See [Liquidity Providing](how-it-works/liquidity-providing.md).
 
 ## Early exit
 
-Don't want to wait for settlement? You can sell your BOUND or BREAK tokens on the `BrimdexOrderBook` to another user at any time while the market is live.
+Don't want to wait for settlement? You can sell your BOUND or BREAK tokens on the **orderbook** to another user at any time while the market is live.
 
 See [The Orderbook](key-concepts/orderbook.md).
 
 
 ## Settlement
 
-At expiry, the protocol keeper calls `settle()`. The contract reads the oracle price, determines the winner, and sets a redemption rate. Winners call `redeem()` to collect their USDC.
+After expiry, the protocol **finalizes** the market using the oracle price and sets who can redeem. **Winners redeem in the app**—you sign a transaction and USDC returns to your wallet.
 
 See [Settlement](how-it-works/settlement.md).
 

@@ -1,6 +1,8 @@
 # Builder Overview
 
-This section is for developers building on top of Brimdex — wrappers, bots, analytics dashboards, or anything that integrates with the protocol.
+This section is for **developers** integrating with Brimdex (bots, dashboards, scripts). It includes **contract calls, ABIs, and code**.
+
+**Using the product?** Read [How it works](../how-it-works/how-it-works-overview.md) and [Key concepts](../key-concepts/key-concepts-overview.md) first—they describe the **UI** (wallet prompts, approvals, trading steps). Technicalities live here and under [Contracts](../contracts/contract-overview.md).
 
 ## What you need
 

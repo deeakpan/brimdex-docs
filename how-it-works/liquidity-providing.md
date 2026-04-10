@@ -1,83 +1,27 @@
 # Liquidity Providing
 
-Liquidity Providers (LPs) seed each market with USDC through the `MarketLiquidityVault`. This bootstrap liquidity creates the initial 50/50 pool, enabling the market to open with a fair starting price.
+Liquidity providers **seed** each market with USDC so the parimutuel pool can start near a **50/50** price. You do this through the **LP** section of the app: pick an **active** market, review the band and time to resolution, then **deposit** USDC into that market’s vault when funding is still open.
 
+## No directional bet
 
-## No directional risk
+LPs are **not** choosing BOUND vs BREAK. Seed USDC is split across both sides of the pool so the market can open fairly. When the market settles, **your seed principal is returned** through the vault flow regardless of which side won.
 
-LPs do **not** take a bet on BOUND or BREAK. The seed USDC is split equally between both pools — it is neutral. At settlement, the seed principal is returned in full regardless of which side wins.
+Your upside is the **streaming fee**: **0.2% of each primary buy** is directed to stabilizing / rewarding seed liquidity (see [Fees](fees.md) for how that fits next to the treasury share).
 
-The LP's incentive is entirely from **streaming fees**, not from the market outcome.
+## In the app
 
+1. Open **LPs** (or the LP entry point in the product).
+2. **Filter** by asset or duration if you want, then **select an active market** from the picker.
+3. Review **time to resolution**, **price bounds**, and **reference spot** so you know what you’re backing.
+4. **Enter a USDC amount** and **deposit** while the vault is still accepting funding. Your wallet will ask you to **approve USDC** for the vault, then to **confirm the deposit**.
+5. After settlement, use **Exit** (or the equivalent control) **once** to claim **accumulated fees** and **your principal share**—the app batches that for you.
 
-## How it works
+You can **add more** USDC later while the market is active; the UI reflects your combined position.
 
-### 1. Deposit USDC
+## What you’re not doing
 
-```solidity
-vault.deposit(usdcAmount);
-```
+You’re not “picking the winner.” You’re helping **bootstrap and stabilize** the market; returns come from the **fee stream**, not from guessing the outcome.
 
-You can deposit before or during the active epoch. Deposits are open until the market settles. Share pricing is NAV-based — you pay the current value of the vault per share, so latecomers don't get a free ride.
+## Deeper protocol math
 
-### 2. Earn streaming fees
-
-Every primary market trade sends **0.2% of the gross trade amount** to the vault. This is distributed proportionally to all LP shares via a reward index (`accRewardPerShare`). You earn from the moment your deposit lands, on all future trades.
-
-### 3. Exit after settlement
-
-```solidity
-vault.exit();
-```
-
-One transaction pays out:
-- All accumulated fee earnings (from your deposit timestamp onwards)
-- Your pro-rata share of the returned seed principal
-
-
-## Share pricing
-
-Shares are priced at vault NAV:
-
-```
-mintShares = depositAmount × totalShares / totalNAV
-totalNAV   = vaultUSDC + deployedPrincipal
-```
-
-`deployedPrincipal` is the seed USDC currently sitting in the market (not yet returned). This means your share price correctly reflects the full value of the vault even while the seed is deployed.
-
-
-## Fee accounting
-
-Fees are tracked with a global reward index that only increases:
-
-```
-accRewardPerShare += feeAmount × PRECISION / totalShares
-```
-
-Your pending fees at any point:
-
-```
-pending = (shares × accRewardPerShare / PRECISION) − rewardDebt + pendingFeeCredit
-```
-
-When you deposit additional USDC (top-up), your pending fees are harvested into `pendingFeeCredit` before your share count updates — so re-deposits never lose earned fees.
-
-
-## Capital safety summary
-
-| Risk | Status |
-|---|---|
-| Directional price risk | None — seed is split 50/50, returned at settlement |
-| Smart contract risk | Standard ERC-20 vault, no admin keys post-deploy |
-| LP principal loss | Not possible by design — principal is separated from trader funds |
-| Fee slippage | None — fees accrue continuously per trade |
-| Exit liquidity | Vault holds USDC + fees; exit is always available after settlement |
-
-
-## Multiple deposits
-
-You can deposit more USDC into a market vault at any time while it is active. Each deposit:
-- Snapshots and preserves any pending fees earned so far
-- Mints new shares at the current NAV price
-- Starts earning fees on the combined share balance from that point forward
+Share pricing, NAV, and onchain fee indexing are implementation details. If you’re **building** on top of Brimdex or auditing contracts, see [Market liquidity vault](../contracts/market-liquidity-vault.md) and the [Builders overview](../builders/builder-overview.md).

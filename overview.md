@@ -28,24 +28,27 @@ You pick a direction — does the price **stay inside the band** (BOUND) or **br
 │   or orderbook                  principal returned      │
 │                                 at settlement           │
 │                                                         │
-│   PRIMARY MARKET   ←→   MarketLiquidityVault            │
-│   BrimdexMarket             (per-market)                │
+│   PRIMARY MARKET   ←→   LP vault (per market)           │
 │                                                         │
 │   SECONDARY MARKET                                      │
-│   BrimdexOrderBook                                      │
+│   Orderbook                                             │
 │   (peer-to-peer token trading)                          │
 └─────────────────────────────────────────────────────────┘
 ```
 
-## Core contracts
+## Onchain components (reference)
 
-| Contract | Role |
+In the **app**, you pick markets, approve USDC when your wallet asks, and confirm trades. The table below is for **transparency**—contract names map to what runs on Somnia.
+
+| Component | Role |
 |---|---|
-| `BrimdexMarket` | Main parimutuel market: buy, settle, redeem |
-| `BrimdexFactory` | Deploys and starts markets in one transaction |
-| `BrimdexOrderBook` | Secondary market — BOUND/BREAK token trading |
-| `MarketLiquidityVault` | Per-market LP vault — seed, fees, principal |
-| `BrimdexRouter` | User-facing entry point — approve once, trade everywhere |
+| Market | Parimutuel core: primary buys, settlement, redeem |
+| Factory | Creates markets and wires vault + tokens |
+| Orderbook | Secondary limit-order trading for BOUND/BREAK |
+| LP vault | Per-market seed liquidity, fee streaming, LP exit |
+| Router | Routes primary buys so you can approve USDC in one place |
+
+Technical ABIs live under [Contracts](contracts/contract-overview.md) and [Builders](builders/builder-overview.md).
 
 ## Built on Somnia
 

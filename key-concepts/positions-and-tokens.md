@@ -1,68 +1,49 @@
 # Positions & Tokens
 
-Every position on Brimdex is represented by an ERC-20 token. When you buy, tokens are minted to your wallet. When you redeem or sell, they are burned or transferred.
+Every position on Brimdex is a **standard token balance** in your wallet. When you **buy** on the primary market, tokens are **minted** to you. When you **redeem** or **sell**, they’re **burned** or **transferred**.
 
 
 ## BOUND and BREAK tokens
 
-Each market deploys two separate ERC-20 tokens:
+Each market has two ERC-20 tokens:
 
 | Token | Wins when | Symbol example |
 |---|---|---|
-| **BOUND** | Final price is inside the band | `BOUND-BTC-1H` |
-| **BREAK** | Final price is outside the band | `BREAK-BTC-1H` |
+| **BOUND** | Final price is inside the band | e.g. tied to BTC + duration |
+| **BREAK** | Final price is outside the band | e.g. tied to BTC + duration |
 
-Both tokens share the same collateral (USDC) and market contract. They use **6 decimals**, matching USDC precision.
-
-
-## Minting
-
-Tokens are minted by the `BrimdexMarket` contract when you call `buyBound()` or `buyBreak()`. The quantity is determined by the pool price at the time of your transaction:
-
-```
-tokens = netUSDC / price
-```
-
-You cannot mint tokens directly — all minting goes through the market's buy functions.
+Both sides use the same underlying collateral model (USDC in the pool). Token amounts use **6 decimals**, consistent with USDC.
 
 
-## Burning
+## How you get tokens
 
-Tokens are burned in two scenarios:
+When you **confirm a buy** in the app, the protocol mints tokens based on the **live pool price** and the **USDC you spend** (after the primary-market fee). You don’t mint manually—the **Buy** flow does it.
 
-1. **Redeem after settlement** — winning tokens are burned and USDC is sent to you
-2. **Emergency withdrawal** — unsettled tokens can be burned to recover pro-rata trader USDC after settlement delay passes (12h past expiry)
+
+## How tokens go away
+
+1. **Redeem after settlement** — if you hold **winning** tokens, the app’s **redeem** flow burns them and sends you USDC.  
+2. **Sell on the orderbook** — tokens transfer to the buyer; nothing is burned.  
+3. **Rare recovery paths** — if settlement is stuck for a long time, there may be a **recovery** option for traders (see [Settlement](../how-it-works/settlement.md)); the product UI reflects what’s available.
 
 
 ## Transferability
 
-BOUND and BREAK tokens are standard ERC-20s — fully transferable. You can:
-
-- Send them to another wallet
-- List them on the `BrimdexOrderBook`
-- Hold them in any ERC-20-compatible wallet
+BOUND and BREAK are normal ERC-20s. You can hold them in your wallet, **sell** on the orderbook, or send them to another address if your wallet supports it.
 
 
-## Viewing your position
+## Seeing your position
 
-Your position is simply your token balance:
-
-```solidity
-boundToken.balanceOf(yourAddress)   // BOUND position
-breakToken.balanceOf(yourAddress)   // BREAK position
-```
-
-Token addresses per market are registered in `BrimdexFactory`:
-
-```solidity
-factory.marketToBoundToken(marketAddress)
-factory.marketToBreakToken(marketAddress)
-```
+In the app, your **position** is your **token balance** for that market’s BOUND or BREAK token—shown on the market page, portfolio, or similar views. You don’t need contract addresses for day-to-day use.
 
 
 ## After settlement
 
-Once the market settles:
-- **Winning tokens** can be redeemed for USDC at the `redemptionRate`
-- **Losing tokens** have zero value and cannot be redeemed
-- Unredeemed winning tokens remain redeemable indefinitely — there is no expiry on redemption
+- **Winning** tokens can be **redeemed** for USDC at the published rate.  
+- **Losing** tokens are worth zero for redemption.  
+- Winning tokens **don’t expire** on a clock—you can redeem when you’re ready.
+
+
+## For builders
+
+Resolving token addresses and calling `balanceOf` onchain is covered in [Fetching markets](../builders/fetching-markets.md) and [Contract interfaces](../builders/contract-interfaces.md).

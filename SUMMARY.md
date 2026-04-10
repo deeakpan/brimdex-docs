@@ -2,6 +2,8 @@
 
 [🌐 brimdex](https://brimdex.markets) · [𝕏 brimdex](https://twitter.com/brimdex) · [✈️ Telegram](https://t.me/brimdex) · [📦 GitHub](https://github.com/deeakpan/Brimdex-contracts) · [🎨 Brand Assets](brand-assets.md)
 
+**How it works** and **Key concepts** = product / UI language. **Builders** and **Contracts** = technical integration.
+
 ---
 
 ## Get Started

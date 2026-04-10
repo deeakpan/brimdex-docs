@@ -1,6 +1,6 @@
 # How It Works
 
-Detailed walkthroughs of every core action on Brimdex.
+Walkthroughs for **using Brimdex in the app**—what you click, what your wallet asks, and what to expect. For **contract calls and code**, see [Builders](../builders/builder-overview.md).
 
 | Page | What it covers |
 |---|---|

@@ -14,18 +14,9 @@ Brimdex uses `BrimdexFeeds` — an onchain oracle contract that stores price dat
 
 ## How feeds work
 
-The `BrimdexFeeds` contract stores a `PriceData` struct per feed:
+Each registered feed has a **price**, **last-updated time**, **precision (decimals)**, and metadata the oracle uses for freshness. Markets read that feed when the band is set and again when the outcome is finalized.
 
-```solidity
-struct PriceData {
-    int256  price;      // scaled by decimals
-    uint64  timestamp;  // last updated
-    uint80  roundId;    // source round
-    uint8   decimals;   // price precision
-}
-```
-
-Markets read the feed at creation (to set the band) and at settlement (to determine the winner). If the feed timestamp is more than **5 minutes old**, the transaction reverts — ensuring no stale price can open or close a market.
+If an update is **too old** (roughly **more than five minutes** behind), the protocol won’t use it to open or close a market—so you’re not settled on a stale print.
 
 ## Adding a feed
 

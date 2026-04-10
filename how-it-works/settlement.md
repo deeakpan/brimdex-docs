@@ -1,70 +1,30 @@
 # Settlement
 
-When a market expires, the protocol keeper calls `settle()`. The contract reads the oracle price, determines the winner, and sets the redemption rate. Winners call `redeem()` to collect their USDC.
+When the **expiry time** passes, the market **stops taking new primary buys** and the protocol **finalizes the outcome** using the live oracle price. You don’t run a separate “settle” action in the app as a trader—the network keeps this automated so winners can redeem.
 
-## Triggering settlement
+## Who wins?
 
-```solidity
-market.settle();
-```
+- **BOUND** wins if the final oracle price is **on or inside** the market’s lower and upper bounds.
+- **BREAK** wins if the final price is **below the lower bound** or **above the upper bound**.
 
-Requirements:
-- `block.timestamp >= expiryTimestamp`
-- Oracle price is fresh (within 5 minutes of `block.timestamp`)
+## What happens to payouts
 
-## Oracle price check
+The **trader pool** (the USDC from traders, after the usual fees on buys) is shared among **holders of the winning token**. Seed liquidity is handled separately so LPs get their principal back through the LP flow, not as a directional bet.
 
-The `BrimdexFeeds` contract provides the final price. The market normalises it to 6 decimal USDC precision:
+If you hold **winning** tokens after settlement, the app lets you **redeem**: you sign a transaction and USDC returns to your wallet. Partial redemptions are fine—you choose how many tokens to cash in.
 
-```solidity
-if (priceData.decimals >= 6)
-    finalPrice = priceData.price / 10^(decimals - 6)
-else
-    finalPrice = priceData.price × 10^(6 - decimals)
-```
+## Oracle freshness
 
-If the oracle data is stale (older than 5 minutes), `settle()` reverts and must be called again when fresh data is available.
+Finalization needs a **recent** oracle reading. If data is temporarily stale, settlement may wait until a fresh price is available; the app will still show the market as pending resolution until that completes.
 
-## Outcome determination
+## Liquidity providers
 
-```
-BOUND wins if: lowerBound ≤ finalPrice ≤ upperBound
-BREAK wins if: finalPrice < lowerBound OR finalPrice > upperBound
-```
+After settlement, LPs use the **LP / vault** flow in the app to **exit once** and receive accumulated fees plus their share of returned principal. See [Liquidity providing](liquidity-providing.md).
 
-## Redemption rate calculation
+## If something goes wrong
 
-```
-traderPool     = totalPool − seedPrincipal
-redemptionRate = traderPool / winningTokenSupply
-```
+If settlement were **unable to complete** for an extended time after expiry, the protocol includes a **last-resort path** for traders to recover a **pro-rata share** of trader funds (not a “winning” payout). This is rare; the UI or docs will reflect the current product behavior if that path is exposed.
 
-The seed is excluded — LPs get their principal back separately. Only the net USDC deposited by traders flows to winners.
+## Integrators & builders
 
-**Edge case:** If all tokens are on one side and that side loses, the trader pool goes to the treasury (no winners to pay).
-
-## Redeeming winnings
-
-```solidity
-market.redeem(isBound, tokenAmount);
-```
-
-```
-payout = tokenAmount × redemptionRate / 1e18
-```
-
-Winning tokens are burned. USDC is sent to your wallet. Partial redemptions are supported.
-
-## LP settlement
-
-After settlement, seed principal is automatically transferred to the `MarketLiquidityVault` before `settle()` returns. LPs call `vault.exit()` to collect fees and principal.
-
-## Emergency withdrawal
-
-If the oracle is persistently unavailable and `settle()` cannot succeed, traders can recover their USDC 12 hours after expiry:
-
-```solidity
-market.emergencyWithdraw(isBound, tokenAmount);
-```
-
-This returns the trader's pro-rata share of trader-only funds (seed excluded). It is a last resort and does not pay winning odds.
+Automation, onchain settlement and redeem methods, emergency paths, and exact accounting are documented in [Brimdex Market](../contracts/brimdex-market.md) and the [Builders](../builders/builder-overview.md) section.

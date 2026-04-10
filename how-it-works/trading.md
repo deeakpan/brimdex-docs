@@ -1,79 +1,38 @@
 # Trading
 
-Buying a position on Brimdex takes a single transaction. You approve USDC to the `BrimdexRouter` once, then call `buyBound` or `buyBreak` for any active market.
+Buying BOUND or BREAK on Brimdex happens in the app: you choose a market, pick a side, enter how much USDC you want to spend, and confirm. The interface walks you through each step.
 
-## Step-by-step
+## In the app
 
-### 1. Approve the router
+1. **Connect your wallet** on Somnia testnet and make sure you have USDC.
 
-```solidity
-USDC.approve(routerAddress, amount);
-```
+2. **Open an active market** from the markets list (or the market page). You’ll see the price band, time to expiry, and current odds.
 
-You only need to do this once per approval amount. The router manages per-market approvals internally.
+3. **Choose BOUND or BREAK**  
+   - **BOUND** wins if the oracle price is **inside** the band at expiry.  
+   - **BREAK** wins if the price ends **outside** the band.
 
-### 2. Buy your position
+4. **Enter the USDC amount** you want to spend. The UI shows an estimate of how many tokens you’ll receive based on the live pool.
 
-```solidity
-// Buy BOUND tokens
-router.buyBound(marketAddress, amount, minTokensOut);
+5. **Set slippage (if shown)** so the trade won’t execute if the pool moves too much and you’d get fewer tokens than your minimum.
 
-// Buy BREAK tokens
-router.buyBreak(marketAddress, amount, minTokensOut);
-```
+6. **Approve USDC** when your wallet prompts you. You’re allowing the app’s **router** to move USDC for this trade. Approvals can be set once for a comfortable limit so you aren’t asked every time; you can also approve per trade if you prefer.
 
-| Parameter | Description |
-|---|---|
-| `marketAddress` | The market you want to trade |
-| `amount` | Gross USDC to spend (6 decimals) |
-| `minTokensOut` | Minimum tokens to receive — reverts if slippage is too high |
+7. **Confirm the buy.** After the transaction confirms, BOUND or BREAK tokens appear in your wallet. The app handles routing behind the scenes.
 
-### 3. Tokens arrive in your wallet
+## What you’re paying
 
-BOUND or BREAK tokens are minted directly to your address. The router never holds tokens.
+The **2% fee** on primary buys is taken from the USDC you send: most goes to the protocol treasury, and **0.2%** is streamed to seed liquidity providers. The rest becomes pool liquidity that backs your tokens. See [Fees](fees.md).
 
-## What happens onchain
+## Limit orders (orderbook)
 
-```
-You send $100 USDC
-→ Router pulls USDC from you
-→ Router approves market for $100
-→ Market takes 2% fee ($1.80 to treasury, $0.20 to LP vault)
-→ Net $98 enters the pool
-→ Tokens minted = $98 / current price
-→ Router revokes market approval
-→ Tokens land in your wallet
-```
+For limit buys and sells, the app will ask you to **approve USDC** (for buys) or **approve the BOUND/BREAK tokens** (for sells) to the **orderbook** when needed—again, your wallet explains what you’re signing.
 
-## Estimating tokens before buying
+## After you buy
 
-Call `getEstimatedTokens` on the market before buying to preview output:
+- Your **position** is simply your **token balance** for that market’s BOUND or BREAK token. The portfolio or market view reflects this.
+- **Hold to settlement** and redeem if your side wins, or **sell early** on the orderbook if you want out before expiry.
 
-```solidity
-market.getEstimatedTokens(isBound, grossUsdc)
-```
+## Integrators & builders
 
-Or call `getEstimatedPayout` to see your expected USDC return at settlement (snapshot estimate based on current pool state):
-
-```solidity
-market.getEstimatedPayout(isBound, grossUsdc)
-```
-
-## Checking your position
-
-Your position is your token balance:
-
-```solidity
-IERC20(factory.marketToBoundToken(market)).balanceOf(yourAddress);
-IERC20(factory.marketToBreakToken(market)).balanceOf(yourAddress);
-```
-
-## After the market settles
-
-Call `redeem()` on the market contract if you hold the winning token:
-
-```solidity
-market.redeem(isBound, tokenAmount);
-```
-
-Specify `isBound = true` for BOUND tokens or `false` for BREAK. The call burns your tokens and sends USDC to your wallet.
+Function names, router flow, and `minTokensOut` semantics are documented for developers in [Builders: Trading](../builders/trading.md) and [Brimdex Router](../contracts/brimdex-router.md).

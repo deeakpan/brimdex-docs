@@ -1,6 +1,6 @@
 # Key Concepts
 
-This section breaks down the fundamental building blocks of Brimdex.
+How Brimdex behaves from a **user and trader** perspective. Protocol math here is for intuition, not wallet calldata—for **ABIs and snippets**, use [Builders](../builders/builder-overview.md).
 
 | Page | What it covers |
 |---|---|

@@ -1,5 +1,7 @@
 # Trading via Contract
 
+**Audience:** integrators and developers. For the **in-app** flow (wallet prompts, approvals, slippage), see [Trading (how it works)](../how-it-works/trading.md).
+
 How to execute buys programmatically using `BrimdexRouter`.
 
 

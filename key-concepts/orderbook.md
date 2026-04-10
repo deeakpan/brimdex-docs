@@ -1,6 +1,6 @@
 # The Orderbook
 
-The `BrimdexOrderBook` is a secondary market for trading BOUND and BREAK tokens before settlement. It is a classic CLOB (Central Limit Order Book) — no AMM, no minting, just token transfers between users.
+The **orderbook** is the secondary market for trading BOUND and BREAK tokens before settlement. It works like a classic limit-order book: no new tokens are minted here—users trade with each other, and the app escrows USDC or tokens until a match.
 
 
 ## Why an orderbook?
@@ -10,11 +10,11 @@ Primary market buys are one-directional — you can buy but not sell back. If yo
 
 ## How it works
 
-**Placing a sell order:**
-You set a limit price and token amount. Your tokens are held in escrow by the contract.
+**Placing a sell order:**  
+You set a limit price and token amount. The app will ask you to **approve** the BOUND/BREAK tokens for the orderbook, then your tokens sit in **escrow** until the order fills or you cancel.
 
-**Placing a buy order:**
-You set a limit price and token amount. Your USDC (notional + buyer fee) is held in escrow.
+**Placing a buy order:**  
+You set a limit price and token amount. The app will ask you to **approve USDC** for the orderbook; your **USDC plus the buyer fee** is held in escrow until a match or cancel.
 
 **Matching:**
 The contract matches on price. An incoming sell hits bids at or above the limit price; an incoming buy hits asks at or below the limit price. Matches execute at the **resting order's price** (maker pricing).
@@ -27,7 +27,7 @@ The contract matches on price. An incoming sell hits bids at or above the limit 
 | Buyer | 1.5% of matched notional |
 | Seller | 1.5% of matched notional |
 
-Buyer deposits `notional + 1.5%` upfront. Seller receives `notional − 1.5%`. Fee goes to the protocol treasury.
+The UI shows **buyer** totals (notional plus fee) and **seller** proceeds (notional minus fee). Fees go to the protocol treasury.
 
 
 ## Per-market isolation

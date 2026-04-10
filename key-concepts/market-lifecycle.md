@@ -1,68 +1,62 @@
 # Market Lifecycle
 
-Every Brimdex market moves through a fixed sequence of states.
+Every Brimdex market goes through clear phases from creation to payout.
 
 
-## States
+## Phases
 
-```
-DEPLOYED → ACTIVE → EXPIRED → SETTLED
-```
+**Created → Live → Expired → Resolved**
 
 
-## 1. Deployed
+## 1. Created
 
-The factory has deployed the market and its vault. The market is not yet open for trading.
-
-This state is invisible to most users — it is an internal factory step that completes in the same transaction as market creation.
+Right after creation, the market and its LP vault exist onchain, but **trading isn’t open** yet until initialization completes. In practice this is a short, automatic step users rarely think about.
 
 
-## 2. Active
+## 2. Live
 
-The market is open for trading. This begins the moment `BrimdexFactory.createMarket()` completes.
+The market is **open for trading**:
 
-During the active state:
-- `buyBound()` and `buyBreak()` are available
-- Orderbook orders can be placed and matched
-- LP deposits into the `MarketLiquidityVault` are accepted
-- Pool prices update with every trade
+- Primary **BOUND/BREAK** buys are available  
+- **Orderbook** limit orders can be placed and matched  
+- **LP deposits** are accepted while funding is open  
+- Pool **prices update** with each primary buy  
 
-The active state ends at `expiryTimestamp`.
+This phase lasts until the **expiry time** shown in the UI.
 
 
 ## 3. Expired
 
-`block.timestamp >= expiryTimestamp`.
+After expiry:
 
-- No new primary market buys accepted
-- Orderbook trading stops
-- Settlement is now callable
+- **No new** primary buys  
+- **Orderbook** activity for that market stops  
+- The system **prepares to resolve** the outcome using the oracle  
 
-The protocol keeper calls `settle()`. The contract reads the oracle price and resolves the outcome. Oracle price must be fresh (within 5 minutes).
-
-
-## 4. Settled
-
-`settle()` has been called and succeeded.
-
-- Winners can call `redeem()` to collect USDC
-- LPs can call `vault.exit()` to collect fees + principal
-- `emergencyWithdraw()` is available as a fallback for edge cases (12h after expiry if settlement has not occurred)
+Automation finalizes resolution; you don’t press a “settle” button as a normal trader.
 
 
-## Timing summary
+## 4. Resolved
 
-| Action | Available when |
+Once finalization succeeds:
+
+- **Winners** can **redeem** in the app for USDC  
+- **LPs** can use the **vault exit** flow for fees + principal  
+- Exceptional **recovery** paths may exist if resolution is delayed (see [Settlement](../how-it-works/settlement.md))
+
+
+## What you can do when
+
+| You want to… | Typical timing |
 |---|---|
-| `buyBound / buyBreak` | Active (before expiry) |
-| Orderbook orders | Active |
-| `settle()` | Expired |
-| `redeem()` | Settled |
-| `vault.exit()` | Settled |
-| `emergencyWithdraw()` | 12h past expiry, not yet settled |
-| `vault.deposit()` | Before settlement (active + expired) |
+| Buy BOUND/BREAK on primary | While market is **live** (before expiry) |
+| Trade on orderbook | While market is **live** |
+| Add LP USDC | While vault accepts deposits (through settlement rules) |
+| Redeem winning tokens | After market is **resolved** |
+| Exit LP position | After **resolution**, via LP exit |
 
+## Slot / uniqueness
 
-## Market slot
+Each live market occupies a **slot** (asset name + duration + band settings). Only one **active** market uses a given slot at a time; after it ends, a new one can be created for that slot.
 
-Each market occupies a **slot** — a unique combination of `name + timeframeDuration + bandPercent`. Only one active market can occupy a slot at a time. Once a market in that slot settles or expires, a new one can be created for the same slot.
+Contract function names and timestamps live in [Builders](../builders/builder-overview.md) / [Factory](../contracts/brimdex-factory.md) docs.

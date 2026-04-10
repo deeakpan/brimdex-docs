@@ -26,7 +26,7 @@ Buying a smaller BREAK position relative to your BOUND holding reduces volatilit
 
 ## Selling on the orderbook
 
-An alternative to buying the other side: sell your existing tokens on the `BrimdexOrderBook` at the current market price. This exits the position entirely rather than creating a two-sided hedge.
+An alternative to buying the other side: **sell** your existing tokens on the **orderbook** at a price you choose. This exits the position entirely rather than creating a two-sided hedge.
 
 Whether to hedge or sell depends on:
 - Current token prices on the orderbook vs primary market

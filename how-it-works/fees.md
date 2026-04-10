@@ -1,55 +1,40 @@
 # Fees
 
-Brimdex has two separate fee structures — one for the primary parimutuel market, one for the secondary orderbook.
+Brimdex has two fee contexts: the **primary market** (parimutuel buys) and the **orderbook** (peer-to-peer limit trades).
 
 
 ## Primary market fees (parimutuel)
 
-Every buy on the primary market incurs a **2% fee on gross USDC**.
+Every **buy** on the primary market pays **2% of the USDC you spend**:
 
-| Recipient | Rate | Basis points |
-|---|---|---|
-| Treasury | 1.8% | 180 bps |
-| LP Vault (streaming) | 0.2% | 20 bps |
-| **Total** | **2.0%** | **200 bps** |
+| Recipient | Rate |
+|---|---|
+| Protocol treasury | 1.8% |
+| Seed LP vault (streaming) | 0.2% |
+| **Total** | **2.0%** |
 
-**Net USDC entering the pool:**
-
-```
-netToPool = grossUsdc × (1 − 0.018 − 0.002) = grossUsdc × 0.98
-```
-
-The LP vault fee is streamed per trade and distributed to all vault depositors proportionally via the reward index.
+So about **98%** of what you spend becomes **net liquidity** in the pool after that fee. The **0.2%** portion **stabilizes and rewards** seed LPs over time; see [Liquidity providing](liquidity-providing.md).
 
 
 ## Orderbook fees
 
-The `BrimdexOrderBook` charges a flat fee on each side of a matched trade:
-
-| Side | Rate |
-|---|---|
-| Buyer | 1.5% of matched notional |
-| Seller | 1.5% of matched notional |
-
-**Buyer deposits:** `notional + 1.5%` upfront into escrow
-**Seller receives:** `notional − 1.5%` on fill
-
-Both fee portions go to the protocol treasury.
+On the **orderbook**, each **matched** trade pays **1.5% of the matched notional** on the **buy side** and **1.5%** on the **sell side** (treasury). The app shows what you’re depositing or receiving so you can see fees before you confirm.
 
 
-## Settlement fees
+## Settlement
 
-None. The entire trader pool (total USDC minus seed) goes to winners with no protocol skim in the normal settlement path.
+**No extra protocol skim** on the trader pool in the normal settlement path—the winning side redeems against that pool.
 
-**Exception:** If one side has zero tokens and the other side loses, the orphaned trader pool is sent to the treasury. This is an extreme edge case.
+**Rare edge case:** if essentially all activity is on one token side and that side **loses**, there may be no natural winners; in that situation protocol rules can route stranded trader funds to the treasury. This is exceptional.
 
 
-## Fee summary table
+## Fee summary
 
 | Action | Fee | Goes to |
 |---|---|---|
-| `buyBound` / `buyBreak` | 2% of trade | 1.8% treasury + 0.2% LP vault |
-| Orderbook buy fill | 1.5% of notional | Treasury |
-| Orderbook sell fill | 1.5% of notional | Treasury |
-| `settle()` / `redeem()` | 0% | — |
-| `vault.exit()` | 0% | — |
+| Primary buy (BOUND or BREAK) | 2% of spend | Treasury + LP vault stream |
+| Orderbook buy fill | 1.5% of matched notional | Treasury |
+| Orderbook sell fill | 1.5% of matched notional | Treasury |
+| Settlement / redeem / LP exit | **0%** protocol fee on those steps | — |
+
+For contract-level detail, see [Builders overview](../builders/builder-overview.md) and the [orderbook](../contracts/brimdex-orderbook.md) / [market](../contracts/brimdex-market.md) references.
