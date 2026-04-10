@@ -1,6 +1,6 @@
 # Brimdex Docs
 
-[🌐 brimdex](https://brimdex.markets) · [𝕏 brimdex](https://twitter.com/brimdex) · [✈️ Telegram](https://t.me/brimdex) · [📦 GitHub](https://github.com/deeakpan/Brimdex-contracts)
+[🌐 brimdex](https://brimdex.markets) · [𝕏 brimdex](https://twitter.com/brimdex) · [✈️ Telegram](https://t.me/brimdex) · [📦 GitHub](https://github.com/deeakpan/Brimdex-contracts) · [🎨 Brand Assets](https://github.com/deeakpan/brimdex-docs/tree/main/brimdex_asset_pack)
 
 ---
 
