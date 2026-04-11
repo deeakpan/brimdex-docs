@@ -2,6 +2,8 @@
 
 Onchain CLOB (Central Limit Order Book) for trading BOUND and BREAK tokens between users. No minting — only token transfers.
 
+**Somnia testnet (current):** `0x1FDFfe2650a092a804B53cDC6c9269957BA64726` — same as `orderBook` in repo `deployments.json`.
+
 **Source:** [`BrimdexOrderBook.sol`](https://github.com/deeakpan/Brimdex-contracts/blob/main/BrimdexOrderBook.sol)
 
 ## Key functions
