@@ -24,8 +24,8 @@ The contract matches on price. An incoming sell hits bids at or above the limit 
 
 | Side | Fee |
 |---|---|
-| Buyer | 1.5% of matched notional |
-| Seller | 1.5% of matched notional |
+| Buyer | 0.5% of matched notional |
+| Seller | 0.5% of matched notional |
 
 The UI shows **buyer** totals (notional plus fee) and **seller** proceeds (notional minus fee). Fees go to the protocol treasury.
 

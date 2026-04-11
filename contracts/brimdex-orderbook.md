@@ -29,7 +29,7 @@ Return escrowed USDC to the buyer.
 
 ## Fees
 
-1.5% per side on matched notional. Collected from escrow at fill time, sent to treasury.
+0.5% per side on matched notional, taken from USDC escrow at fill time on each side of the match.
 
 ## Per-market isolation
 
@@ -39,7 +39,7 @@ Every order is associated with a specific market address. The contract rejects o
 
 | Variable | Description |
 |---|---|
-| `feeRate` | 150 bps per side |
+| `feeRate` | 0.5% per side |
 | `marketFactory` | Reference to BrimdexFactory for market validation |
 | `orders` | Mapping of orderId → Order |
 | Price level linked lists | Sorted bid/ask queues per market per side |

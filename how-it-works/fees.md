@@ -18,7 +18,7 @@ So about **98%** of what you spend becomes **net liquidity** in the pool after t
 
 ## Orderbook fees
 
-On the **orderbook**, each **matched** trade pays **1.5% of the matched notional** on the **buy side** and **1.5%** on the **sell side** (treasury). The app shows what you’re depositing or receiving so you can see fees before you confirm.
+On the **orderbook**, each **matched** trade pays **0.5% of the matched notional** on the **buy side** and **0.5%** on the **sell side**. The app shows what you’re depositing or receiving so you can see fees before you confirm.
 
 
 ## Settlement
@@ -33,8 +33,8 @@ On the **orderbook**, each **matched** trade pays **1.5% of the matched notional
 | Action | Fee | Goes to |
 |---|---|---|
 | Primary buy (BOUND or BREAK) | 2% of spend | Treasury + LP vault stream |
-| Orderbook buy fill | 1.5% of matched notional | Treasury |
-| Orderbook sell fill | 1.5% of matched notional | Treasury |
+| Orderbook buy fill | 0.5% of matched notional | Protocol |
+| Orderbook sell fill | 0.5% of matched notional | Protocol |
 | Settlement / redeem / LP exit | **0%** protocol fee on those steps | — |
 
 For contract-level detail, see [Builders overview](../builders/builder-overview.md) and the [orderbook](../contracts/brimdex-orderbook.md) / [market](../contracts/brimdex-market.md) references.
