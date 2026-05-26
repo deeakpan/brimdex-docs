@@ -22,9 +22,28 @@ The current design uses **sBDX** as that receipt token.
 
 ## Why the receipt token matters
 
-The receipt token makes staking easier to understand and track because it represents your staked position directly.
+The receipt token is not just accounting in the background. In the current contracts, `sBDX` is a real wallet token:
 
-That means staking is not just a hidden balance inside the protocol. It becomes a visible part of your protocol participation.
+- minted **1:1** when you stake BDX
+- burned **1:1** when you withdraw BDX
+- transferable
+- lockable into `xBDX`
+
+That gives stakers a more flexible participation path than a non-transferable staking balance.
+
+## What stakers get
+
+In the current staking contract, `sBDX` holders earn **USDC rewards** funded by the staker share of Brimdex trading fees.
+
+That means stakers can:
+
+- accumulate USDC rewards over time
+- claim those rewards when they want
+- use `exit()` to withdraw BDX and claim accrued USDC in one go
+
+## Important benefit
+
+Because `sBDX` lives in your wallet, it is also the asset you lock to move into the governance layer.
 
 ## Who staking is for
 

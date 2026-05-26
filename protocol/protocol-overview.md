@@ -1,6 +1,6 @@
 # Protocol Overview
 
-Brimdex is more than a trading interface. It is also a protocol with its own token layer, governance path, staking system, and long-term alignment model.
+Brimdex is more than a trading interface. It also has a token and governance layer designed around long-term participation.
 
 ## What sits under the product
 
@@ -16,11 +16,25 @@ The user-facing Brimdex experience is built around:
 
 The Brimdex protocol layer covers:
 
-- the **BDX** token
-- governance over protocol decisions
-- staking for rewards and alignment
-- locking for longer-term voting power
-- treasury and emissions decisions over time
+- **BDX** as the base token
+- **sBDX** as the staking receipt token
+- **xBDX** as the locked governance position
+- onchain governance through a governor and timelock
+- emissions and treasury decisions over time
+
+## The participation path
+
+The current protocol path is:
+
+1. hold **BDX**
+2. stake BDX to receive **sBDX**
+3. lock `sBDX` to receive **xBDX**
+
+Each step does something different:
+
+- **BDX** is the base asset
+- **sBDX** keeps your staked position liquid and reward-bearing
+- **xBDX** is the long-term governance position
 
 ## Why this matters to users
 
@@ -32,6 +46,14 @@ It gives the ecosystem a way to:
 - reward users who stay involved
 - vote on protocol changes
 - build governance around fees, incentives, and treasury decisions
+
+## What users get from it
+
+In the current contract design:
+
+- `sBDX` holders earn **USDC trade-fee rewards**
+- `xBDX` holders hold the governance power used by the current governor
+- users with at least **200,000 xBDX** qualify for the discounted trading fee path
 
 ## Main pages in this section
 

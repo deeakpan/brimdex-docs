@@ -20,7 +20,38 @@ The protocol path looks like this:
 2. stake it
 3. lock it for longer-term governance weight
 
-The current design uses **xBDX** as the locked governance position.
+The current design locks **sBDX**, not raw BDX, and mints **xBDX** as the locked governance position.
+
+## What xBDX is
+
+In the current contracts, `xBDX` is a **vote-escrow NFT**:
+
+- it is created when `sBDX` is locked
+- its voting power decays over time
+- longer locks create stronger governance weight
+
+The lock can run for up to **4 years**.
+
+## What lockers can do
+
+Once a lock exists, the current escrow contract lets users:
+
+- create a new lock
+- add more `sBDX` to an existing lock
+- extend the unlock time
+- withdraw once the lock expires
+
+## Why locking matters in practice
+
+Locking is not just symbolic. In the current design it is tied to two real benefits:
+
+- **governance power** through `xBDX`
+- the **discounted trading fee path** once a user holds at least **200,000 xBDX**
+
+The fee config documents that discount as:
+
+- standard fee: **0.9%**
+- discounted fee: **0.675%**
 
 ## Why locking matters
 
