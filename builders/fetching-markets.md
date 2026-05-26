@@ -1,93 +1,61 @@
-# Fetching Markets
+# Market Data
 
-How to enumerate and read market state from `BrimdexFactory` and `BrimdexMarket`.
+For frontends, the easiest source is the Brimdex API / indexed layer.
 
+For lower-level integrations, the current onchain discovery flow is built around the LMSR stack contracts.
 
-## Get all markets
+## Preferred sources
 
-```js
-const markets = await factory.getAllMarkets();
-// returns address[]
-```
+### 1. Public Brimdex API
 
-Paginated:
+For product-quality market discovery, start with the public Brimdex API under:
 
-```js
-const markets = await factory.getMarkets(offset, limit);
-```
+- `https://brimdex.markets/api/`
 
+Use it as the higher-level discovery layer before dropping down to direct chain reads.
 
-## Check if a market is active
+### 2. Onchain events
 
-```js
-const active = await factory.isActiveMarket(name, timeframeDuration, bandPercent);
-// returns bool
-```
+For direct indexing, watch `BrimdexLMSRStackFactory` events such as:
 
-Or read market config directly:
+- `VaultCreated`
+- `MarketOpened`
 
-```js
-const [
-  name,
-  feedName,
-  lowerBound,
-  upperBound,
-  expiryTimestamp,
-  creationTimestamp,
-  startPrice,
-  initialized,
-  settled
-] = await market.marketConfig();
+That gives you the lifecycle from launch vault to live market.
 
-const isLive = initialized && !settled && expiryTimestamp > Date.now() / 1000;
-```
+## Reading launch vault state
 
+The launch vault exposes the market template and phase information:
 
-## Get current prices
+- `phase()`
+- `assetKey`
+- `bandBps`
+- `horizonSeconds`
+- `requiredNotional`
+- `commitmentDeadline`
 
-```js
-const boundPrice = await market.getBoundPrice(); // 1e18 precision
-const breakPrice = await market.getBreakPrice(); // 1e18 precision
+This is the best place to understand a market before it is opened.
 
-// e.g. 650000000000000000n = 0.65 (65%)
-const boundPct = Number(boundPrice) / 1e18;
-```
+## Reading live market odds
 
+Once a market is live, the core odds surface comes from `LMSRMarketMaker`.
 
-## Get pool sizes
+The main read most integrations care about is:
 
-```js
-const boundPool = await market.boundPool(); // USDC, 6 decimals
-const breakPool = await market.breakPool();
-const traderPool = await market.getDisplayPool(); // total minus seed
-```
+- `calcMarginalPrice(uint8 outcomeTokenIndex)`
 
+Use outcome `0` / `1` according to your integration's side mapping and ABI.
 
-## Get token addresses
+## Reading market state
 
-```js
-const boundToken = await factory.marketToBoundToken(marketAddress);
-const breakToken = await factory.marketToBreakToken(marketAddress);
-const vault      = await factory.marketToLiquidityVault(marketAddress);
-```
+A complete market view usually combines:
 
+- factory / event discovery
+- launch vault metadata
+- LMSR marginal prices
+- orderbook state if you support secondary trading
+- conditional-token balances for user positions
 
-## Estimate trade output
+## Practical recommendation
 
-```js
-// Preview tokens for a given gross USDC spend
-const tokens = await market.getEstimatedTokens(isBound, grossUsdc);
-
-// Preview USDC payout at settlement (snapshot estimate)
-const payout = await market.getEstimatedPayout(isBound, grossUsdc);
-```
-
-
-## Get settlement outcome
-
-```js
-const settled   = marketConfig.settled;
-const boundWins = await market.boundWins();
-const rate      = await market.redemptionRate(); // 1e18 precision
-const price     = await market.resolvedPrice();
-```
+If you are building a UI, use the Brimdex API layer for discovery and hydrate selected live values fromchain only where latency matters most.

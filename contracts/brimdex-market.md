@@ -1,30 +1,64 @@
-# BrimdexMarket
+# LMSR Market Maker
 
-The core parimutuel market contract. One instance per market, deployed by `BrimdexFactory`.
+The live primary market on Brimdex is implemented by `LMSRMarketMaker`, which extends the shared `MarketMaker` base.
 
-**Source:** [`BrimdexMarket.sol`](https://github.com/deeakpan/Brimdex-contracts/blob/main/BrimdexMarket.sol)
+**Sources:**
 
-## State
+- `smart-contract/lmsr/LMSRMarketMaker.sol`
+- `smart-contract/lmsr/MarketMaker.sol`
 
-| Variable | Type | Description |
-|---|---|---|
-| `marketConfig` | `MarketConfig` | Name, bounds, expiry, start price, flags |
-| `collateralToken` | `IERC20` | USDC |
-| `boundToken` | `BrimdexParimutuelToken` | BOUND ERC-20 |
-| `breakToken` | `BrimdexParimutuelToken` | BREAK ERC-20 |
-| `boundPool` | `uint256` | USDC in the BOUND pool |
-| `breakPool` | `uint256` | USDC in the BREAK pool |
-| `seedPrincipal` | `uint256` | USDC seeded by LP vault |
-| `liquidityVault` | `address` | Per-market LP vault |
-| `redemptionRate` | `uint256` | Set at settlement (1e18 precision) |
-| `boundWins` | `bool` | Outcome (set at settlement) |
+## What it does
 
-## Constants
+`LMSRMarketMaker` is responsible for:
 
-| Constant | Value | Description |
-|---|---|---|
-| `TRADE_FEE_BPS` | 200 | 2% total trade fee |
-| `TRADE_FEE_TREASURY_BPS` | 180 | 1.8% to treasury |
-| `TRADE_FEE_SEED_BPS` | 20 | 0.2% to LP vault |
-| `MAX_ORACLE_STALENESS` | 300 | 5 minutes |
-| `EMERGENCY_DELAY` | 43200 | 12 hours |
+- pricing BOUND and BREAK continuously
+- executing primary-market trades
+- tracking the live market state
+- resolving the market after expiry
+- sending residual LP value back to the vault
+
+## Key state
+
+The market maker is built around:
+
+- `collateralToken`
+- `feeConfig`
+- `assetKey`
+- `lowerBound`
+- `upperBound`
+- `expiryTimestamp`
+- vault reference
+- conditional-token system reference
+
+## Important behavior
+
+### Continuous pricing
+
+The contract exposes LMSR pricing, including `calcMarginalPrice(...)`, so the app can show live odds.
+
+### Trade execution
+
+Trades are normally routed through `BrimdexLMSRRouter`, but the market maker is where the actual execution and accounting happen.
+
+### Expiry-aware resolution
+
+After expiry, the contract resolves the market through the conditional-token / oracle path and closes the AMM state.
+
+### LP settlement path
+
+When the market resolves, residual value and LP-fee value are returned toward the vault redemption path.
+
+## Why this contract matters
+
+This is the contract that turns Brimdex from a static range definition into a tradable market:
+
+- it owns the live odds
+- it owns the trade path
+- it is the bridge between trading and settlement
+
+## Related contracts
+
+- [LMSR Router](brimdex-router.md)
+- [Fee Config](brimdex-fee-config.md)
+- [Stack Launch Vault](market-liquidity-vault.md)
+- [Feeds & Coordinators](feeds-and-coordinators.md)

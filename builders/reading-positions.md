@@ -1,76 +1,64 @@
-# Reading Positions
+# Positions & Redemptions
 
-How to read a user's open positions, pending payouts, and LP state.
+Brimdex positions come from two different places:
 
+- trader outcome exposure
+- LP commitment / redemption state
 
-## Token balances (trading positions)
+## Trader positions
 
-```js
-const boundToken = new ethers.Contract(
-  await factory.marketToBoundToken(marketAddress),
-  ['function balanceOf(address) view returns (uint256)'],
-  provider
-);
+For trader-facing positions, read:
 
-const breakToken = new ethers.Contract(
-  await factory.marketToBreakToken(marketAddress),
-  ['function balanceOf(address) view returns (uint256)'],
-  provider
-);
+- outcome token balances from the conditional-token side
+- market resolution status
+- whether the market is still live or already settled
 
-const boundBalance = await boundToken.balanceOf(userAddress);
-const breakBalance = await breakToken.balanceOf(userAddress);
-```
+In practice, most frontends should use the indexed position layer first and then hydrate important edge cases fromchain.
 
+## Useful position inputs
 
-## Estimated payout at settlement
+A useful position view normally combines:
 
-```js
-const redemptionRate = await market.redemptionRate(); // set after settlement
+- user outcome balances
+- market odds
+- entry / trade history
+- settlement status
+- redeemability status
 
-// If market settled and user holds winning tokens:
-const payout = (balance * redemptionRate) / BigInt(1e18);
-```
+## LP positions
 
-Before settlement, estimate with current pool state:
+LP state lives in `BrimdexStackLaunchVault`.
 
-```js
-const estimated = await market.getEstimatedPayout(isBound, grossUsdc);
-```
+The most important reads are:
 
+- commitment token balance
+- current vault phase
+- whether the market opened or aborted
+- whether LP redemption is available
 
-## LP positions (vault)
+## Position reading strategy
 
-```js
-const vault = new ethers.Contract(vaultAddress, VAULT_ABI, provider);
+### For app-like views
 
-const shares          = await vault.sharesOf(userAddress);
-const pendingFees     = await vault.pendingFees(userAddress);
-const principalShare  = await vault.principalShareUsdc(userAddress);
-const totalOnExit     = await vault.totalExitUsdc(userAddress);
-```
+Use indexed APIs for:
 
+- historical trades
+- entry price / cost basis
+- portfolio aggregation
 
-## Reading across all markets
+### For settlement-critical views
 
-To build a portfolio view:
+Hydrate fromchain for:
 
-```js
-const allMarkets = await factory.getAllMarkets();
+- current redeemable balance
+- whether the vault or market has already resolved
+- whether the user has already redeemed
 
-for (const marketAddr of allMarkets) {
-  const boundToken = await factory.marketToBoundToken(marketAddr);
-  const breakToken = await factory.marketToBreakToken(marketAddr);
-  const vault      = await factory.marketToLiquidityVault(marketAddr);
+## Why a mixed approach is best
 
-  const [bound, brk, lpShares] = await Promise.all([
-    erc20(boundToken).balanceOf(user),
-    erc20(breakToken).balanceOf(user),
-    vault ? erc20Vault(vault).sharesOf(user) : 0n,
-  ]);
+Brimdex position UX usually needs both:
 
-  if (bound > 0n || brk > 0n || lpShares > 0n) {
-    // user has a position in this market
-  }
-}
-```
+- indexed history for speed and portfolio assembly
+- direct onchain reads for live redemption truth
+
+That is especially important around expiry, settlement, and recent redemptions.

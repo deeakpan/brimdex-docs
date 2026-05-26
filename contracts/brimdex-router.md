@@ -1,57 +1,52 @@
-# BrimdexRouter
+# LMSR Router
 
-The recommended user-facing entry point. Approve USDC once to the router, then trade across all markets without re-approving per-market.
+`BrimdexLMSRRouter` is the recommended user-facing entry point for primary-market trading.
 
-**Source:** [`BrimdexRouter.sol`](https://github.com/deeakpan/Brimdex-contracts/blob/main/BrimdexRouter.sol)
+**Source:** `smart-contract/lmsr/BrimdexLMSRRouter.sol`
 
+## Why it exists
 
-## Why use the router?
+The router gives the app and integrators a cleaner trading surface for LMSR markets.
 
-Without the router, you would need to approve each market contract separately. The router batches this: you approve the router, the router handles per-market approval internally and revokes it after each trade.
+It is the preferred place to send primary trades instead of wiring directly to every market-specific contract path.
 
-The router also publishes trade data to Somnia Data Streams for analytics.
+## What it does
 
+The router is responsible for:
 
-## Key functions
+- taking the user trade input
+- moving approved collateral into the LMSR trade path
+- executing the trade against the chosen market
+- returning the resulting outcome exposure to the user
 
-### `buyBound(marketAddress, amount, minTokensOut)`
+## Main action
 
-```solidity
-router.buyBound(marketAddress, amount, minTokensOut);
-```
+### `tradeLmsr(...)`
 
-| Parameter | Description |
-|---|---|
-| `marketAddress` | Target market (must be registered in factory) |
-| `amount` | USDC to spend (gross, 6 decimals) |
-| `minTokensOut` | Minimum BOUND tokens to receive (slippage guard) |
+This is the core trade entry point for the current stack.
 
-### `buyBreak(marketAddress, amount, minTokensOut)`
+The exact calldata shape depends on the deployed version and ABI, but conceptually it includes:
 
-Same parameters, mints BREAK tokens.
+- target market
+- outcome side
+- collateral amount
+- user protection parameters such as minimum acceptable output
 
+## Why developers should use it
 
-## Approval flow
+Using the router gives integrators:
 
-```
-1. User approves router for USDC
-2. Router pulls USDC from user
-3. Router approves market (exact amount)
-4. Router calls market.buyBound / buyBreak
-5. Tokens minted directly to user
-6. Router revokes market approval
-```
+- a stable trading entry surface
+- easier approval management
+- cleaner app-side execution logic
 
-If the market call reverts for any reason, the router refunds USDC to the user and revokes the approval before re-reverting.
+## Relationship to the market maker
 
+The router does not own the market logic. It forwards the trade into the live `LMSRMarketMaker`, which performs:
 
-## Data Streams
+- pricing
+- fill accounting
+- fee handling
+- position mint / transfer effects
 
-After each successful buy, the router publishes trade data to Somnia Data Streams:
-
-```
-Schema: address user, address market, uint256 amount,
-        uint256 tokens, uint64 timestamp, bool isBound
-```
-
-This is non-critical — if the publish fails, the trade still succeeds.
+See [LMSR Market Maker](brimdex-market.md) for the execution contract underneath.

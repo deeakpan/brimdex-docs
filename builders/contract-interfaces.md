@@ -1,99 +1,72 @@
-# Contract Interfaces
+# Contracts & ABIs
 
-Minimal ABIs for integrating with Brimdex. Copy what you need.
+Use the generated ABIs from the repository artifacts instead of copying old handwritten interface snippets.
 
+## Recommended ABI sources
 
-## BrimdexFactory
+### LMSR stack
 
-```json
-[
-  "function getAllMarkets() view returns (address[])",
-  "function getMarkets(uint256 offset, uint256 limit) view returns (address[])",
-  "function getMarketCount() view returns (uint256)",
-  "function isMarket(address) view returns (bool)",
-  "function isActiveMarket(string, uint256, uint256) view returns (bool)",
-  "function marketToBoundToken(address) view returns (address)",
-  "function marketToBreakToken(address) view returns (address)",
-  "function marketToLiquidityVault(address) view returns (address)",
-  "function seedPrincipal() view returns (uint256)"
-]
-```
+- `artifacts-lmsr/` or `artifacts-lmsr-brimdex/`
+- `smart-contract/lmsr/BrimdexLMSRStackFactory.sol`
+- `smart-contract/lmsr/LMSRMarketMaker.sol`
+- `smart-contract/lmsr/BrimdexLMSRRouter.sol`
+- `smart-contract/lmsr/BrimdexFeeConfig.sol`
 
+### Raise / LP vault
 
-## BrimdexMarket
+- `smart-contract/raise/BrimdexStackLaunchVault.sol`
 
-```json
-[
-  "function marketConfig() view returns (string name, string feedName, uint256 lowerBound, uint256 upperBound, uint256 expiryTimestamp, uint256 creationTimestamp, uint256 startPrice, bool initialized, bool settled)",
-  "function boundPool() view returns (uint256)",
-  "function breakPool() view returns (uint256)",
-  "function seedPrincipal() view returns (uint256)",
-  "function getBoundPrice() view returns (uint256)",
-  "function getBreakPrice() view returns (uint256)",
-  "function getDisplayPool() view returns (uint256)",
-  "function getEstimatedTokens(bool isBound, uint256 grossUsdc) view returns (uint256)",
-  "function getEstimatedPayout(bool isBound, uint256 grossUsdc) view returns (uint256)",
-  "function boundWins() view returns (bool)",
-  "function redemptionRate() view returns (uint256)",
-  "function resolvedPrice() view returns (uint256)",
-  "function buyBound(uint256 amount, address recipient, uint256 minTokensOut) nonpayable",
-  "function buyBreak(uint256 amount, address recipient, uint256 minTokensOut) nonpayable",
-  "function settle() nonpayable",
-  "function redeem(bool isBound, uint256 amount) nonpayable"
-]
-```
+### Orderbook
 
+- `smart-contract/orderbook/BrimdexCTFOrderBook.sol`
 
-## BrimdexRouter
+### Oracle / automation
 
-```json
-[
-  "function buyBound(address marketAddress, uint256 amount, uint256 minTokensOut) nonpayable",
-  "function buyBreak(address marketAddress, uint256 amount, uint256 minTokensOut) nonpayable"
-]
-```
+- `smart-contract/oracle/BrimdexFeeds/BrimdexFeeds.sol`
+- `smart-contract/oracle/BrimdexFeeds/BrimdexReactivityCoordinator.sol`
+- `smart-contract/oracle/BrimdexFeeds/BrimdexLaunchOpenCoordinator.sol`
+- `smart-contract/oracle/BrimdexFeeds/BrimdexFeedAgentPuller.sol`
 
+## High-signal functions
 
-## MarketLiquidityVault
+If you only need to orient yourself before loading the full ABI, these are the main current entry points:
 
-```json
-[
-  "function deposit(uint256 usdcAmount) nonpayable",
-  "function exit() nonpayable",
-  "function sharesOf(address) view returns (uint256)",
-  "function totalShares() view returns (uint256)",
-  "function pendingFees(address) view returns (uint256)",
-  "function principalShareUsdc(address) view returns (uint256)",
-  "function totalExitUsdc(address) view returns (uint256)",
-  "function totalNAV() view returns (uint256)",
-  "function seedFinalized() view returns (bool)",
-  "function principalBalance() view returns (uint256)",
-  "function targetSeed() view returns (uint256)"
-]
-```
+### `BrimdexLMSRStackFactory`
 
+- `createLaunchVault(...)`
+- `authorizeVault(address)`
+- `openMarket(...)`
 
-## BrimdexOrderBook
+### `BrimdexLMSRRouter`
 
-```json
-[
-  "function placeSellOrder(address market, bool isBound, uint256 amount, uint256 limitPrice) nonpayable returns (uint256 orderId)",
-  "function placeBuyOrder(address market, bool isBound, uint256 amount, uint256 limitPrice) nonpayable returns (uint256 orderId)",
-  "function cancelSellOrder(uint256 orderId) nonpayable",
-  "function cancelBuyOrder(uint256 orderId) nonpayable",
-  "function feeRate() view returns (uint256)"
-]
-```
+- `tradeLmsr(LMSRMarketMaker market, int256[] outcomeTokenAmounts, int256 collateralLimit)`
 
+### `LMSRMarketMaker`
 
-## ERC-20 (BOUND / BREAK tokens)
+- `calcNetCost(...)`
+- `calcMarginalPrice(uint8 outcomeTokenIndex)`
+- `trade(...)`
+- `resolve()`
 
-```json
-[
-  "function balanceOf(address) view returns (uint256)",
-  "function totalSupply() view returns (uint256)",
-  "function approve(address spender, uint256 amount) nonpayable returns (bool)",
-  "function transfer(address to, uint256 amount) nonpayable returns (bool)",
-  "function transferFrom(address from, address to, uint256 amount) nonpayable returns (bool)"
-]
-```
+### `BrimdexStackLaunchVault`
+
+- `phase()`
+- `commit(uint256)`
+- `openCommittedMarket()`
+- `finishOpen()`
+- `redeemLP()`
+- `redeemCommitment()`
+
+### `BrimdexCTFOrderBook`
+
+- `placeSellOrder(...)`
+- `placeBuyOrder(...)`
+- `cancelSellOrder(...)`
+- `cancelBuyOrder(...)`
+- `getBestBid(...)`
+- `getBestAsk(...)`
+- `getOrderBookSnapshot(...)`
+
+## Best practice
+
+Do not hand-maintain inline ABI docs unless you are pinning them to a specific deployment version. For the current repo, the generated artifacts are the safest source of truth.

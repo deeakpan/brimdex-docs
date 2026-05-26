@@ -1,23 +1,81 @@
 # Supported Assets
 
-Brimdex uses `BrimdexFeeds` — an onchain oracle contract that stores price data for registered feed names. Any asset with a registered feed can have a market created against it.
+Brimdex is built for a mixed asset universe. Markets can be launched across **crypto**, **stocks**, and **real-world assets / commodities**.
 
-## Current feeds (Somnia Testnet)
+## Asset classes
 
-| Feed Name | Asset | Decimals |
-|---|---|---|
-| `SOL/USD` | Solana | 6 |
-| `ETH/USD` | Ethereum | 6 |
-| `BTC/USD` | Bitcoin | 6 |
-| `SOMI/USD` | Somnia | 6 |
-| `BNB/USD` | BNB | 6 |
+### Crypto
 
-## How feeds work
+| Feed | Asset |
+|---|---|
+| `BTC/USD` | Bitcoin |
+| `ETH/USD` | Ethereum |
+| `SOL/USD` | Solana |
+| `BNB/USD` | BNB |
+| `SOMI/USD` | Somnia |
+| `ARB/USD` | Arbitrum |
 
-Each registered feed has a **price**, **last-updated time**, **precision (decimals)**, and metadata the oracle uses for freshness. Markets read that feed when the band is set and again when the outcome is finalized.
+### Stocks and indices
 
-If an update is **too old** (roughly **more than five minutes** behind), the protocol won’t use it to open or close a market—so you’re not settled on a stale print.
+| Feed | Asset |
+|---|---|
+| `TSLA/USD` | Tesla |
+| `AAPL/USD` | Apple |
+| `NVDA/USD` | NVIDIA |
+| `MSFT/USD` | Microsoft |
+| `GOOGL/USD` | Alphabet |
+| `AMZN/USD` | Amazon |
+| `META/USD` | Meta |
+| `NFLX/USD` | Netflix |
+| `AMD/USD` | AMD |
+| `SPY/USD` | SPDR S&P 500 ETF |
 
-## Adding a feed
+### RWAs and commodities
 
-The community will vote on new assets to be integrated. Feeds are registered onchain by the `BrimdexFeeds` contract owner once governance approves them. To propose a new asset, join the conversation on [Telegram](https://t.me/brimdex).
+| Feed | Asset |
+|---|---|
+| `XAU/USD` | Gold |
+| `XAG/USD` | Silver |
+| `WTI/USD` | WTI crude oil |
+
+## What a supported asset means
+
+A supported asset has:
+
+- a registered `assetKey`
+- a mapped price feed
+- a curated UI symbol and metadata entry
+- a launch path through the stack factory and launch vault flow
+
+Markets do not have to be live for every asset all the time. Brimdex can list a wider asset universe than the currently active market set.
+
+## Example markets by asset class
+
+| Category | Example market |
+|---|---|
+| Crypto | `ETH / USD · 10m · ±0.5%` |
+| Stock | `NVDA / USD · 30m · ±1.5%` |
+| RWA / commodity | `XAU / USD · 2h · ±1.0%` |
+
+## Oracle freshness
+
+Brimdex launches and settles markets against fresh prices only.
+
+- prices are written onchain
+- stale prices are rejected for launch and settlement
+- Somnia agents and Somnia Reactivity are used to keep launch and settlement automation tight
+
+## Multichain access, single settlement chain
+
+Brimdex can route users and liquidity from other ecosystems through **Stargate**, but the market itself still settles on **Somnia**. That means the asset universe can be accessed from multiple chains while the canonical market state remains on one execution chain.
+
+## Adding assets
+
+Adding a new asset means registering the feed and metadata needed for:
+
+- launch vault creation
+- market deployment
+- Somnia settlement
+- UI discovery and filtering
+
+The exact feed wiring is covered in [Feeds & Coordinators](contracts/feeds-and-coordinators.md).

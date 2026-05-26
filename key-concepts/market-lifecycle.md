@@ -1,62 +1,103 @@
 # Market Lifecycle
 
-Every Brimdex market goes through clear phases from creation to payout.
+Brimdex markets follow a launch-vault-to-settlement lifecycle on Somnia.
 
+## Lifecycle at a glance
 
-## Phases
+**Launch vault -> Pending launch -> Live market -> Expiry -> Settlement -> Redemptions**
 
-**Created → Live → Expired → Resolved**
+## 1. Launch vault created
 
+A launch vault is created for a specific:
 
-## 1. Created
+- asset
+- band
+- horizon
+- fee config
+- launch target
 
-Right after creation, the market and its LP vault exist onchain, but **trading isn’t open** yet until initialization completes. In practice this is a short, automatic step users rarely think about.
+At this stage, the market maker is not live yet. Users are committing capital to the vault that will open it.
 
+## 2. Commitments collected
 
-## 2. Live
+The launch vault accepts USDC commitments until:
 
-The market is **open for trading**:
+- the target notional is reached, or
+- the commitment window expires
 
-- Primary **BOUND/BREAK** buys are available  
-- **Orderbook** limit orders can be placed and matched  
-- **LP deposits** are accepted while funding is open  
-- Pool **prices update** with each primary buy  
+If the target is not met in time, the vault can abort and commitments can be redeemed.
 
-This phase lasts until the **expiry time** shown in the UI.
+## 3. Pending launch
 
+Once the vault reaches target:
 
-## 3. Expired
+- Somnia Reactivity schedules the launch flow
+- a Somnia agent fetches the relevant price
+- the market receives the fresh price it needs
+- the launch flow completes and the market opens
 
-After expiry:
+This is the bridge between capital formation and the live market.
 
-- **No new** primary buys  
-- **Orderbook** activity for that market stops  
-- The system **prepares to resolve** the outcome using the oracle  
+## 4. Live market
 
-Automation finalizes resolution; you don’t press a “settle” button as a normal trader.
+When the market opens:
 
+- BOUND and BREAK trading starts
+- the orderbook can be used for secondary trading
+- odds update with every trade
+- LP seed is now actively backing the market
 
-## 4. Resolved
+This is the phase most traders interact with.
 
-Once finalization succeeds:
+## 5. Expiry
 
-- **Winners** can **redeem** in the app for USDC  
-- **LPs** can use the **vault exit** flow for fees + principal  
-- Exceptional **recovery** paths may exist if resolution is delayed (see [Settlement](../how-it-works/settlement.md))
+At expiry:
 
+- no more live trading should be accepted
+- the market transitions into settlement preparation
+- Somnia Reactivity schedules the settlement path
 
-## What you can do when
+## 6. Settlement on Somnia
 
-| You want to… | Typical timing |
+Brimdex chooses to settle on Somnia.
+
+The settlement flow is:
+
+1. market expires
+2. the settlement coordinator / puller is triggered
+3. the final price is fetched and written through the Somnia-native path
+4. the market resolves on Somnia
+5. the resolved state becomes redeemable
+
+The protocol is designed for **sub-2s reactive settlement** once the final trigger and final price are available.
+
+## 7. Redemption phase
+
+After settlement:
+
+- traders redeem winning BOUND or BREAK positions
+- LPs redeem their commitment-token share of the resolved LP pool
+- the market is economically complete
+
+## What users can do when
+
+| Action | Phase |
 |---|---|
-| Buy BOUND/BREAK on primary | While market is **live** (before expiry) |
-| Trade on orderbook | While market is **live** |
-| Add LP USDC | While vault accepts deposits (through settlement rules) |
-| Redeem winning tokens | After market is **resolved** |
-| Exit LP position | After **resolution**, via LP exit |
+| Commit to launch vault | Before launch target is met |
+| Trade BOUND / BREAK | While live |
+| Use the orderbook | While live |
+| Redeem winning positions | After settlement |
+| Redeem LP share | After settlement |
 
-## Slot / uniqueness
+## Why this lifecycle matters
 
-Each live market occupies a **slot** (asset name + duration + band settings). Only one **active** market uses a given slot at a time; after it ends, a new one can be created for that slot.
+Brimdex is not just a single market contract. The product is a coordinated flow across:
 
-Contract function names and timestamps live in [Builders](../builders/builder-overview.md) / [Factory](../contracts/brimdex-factory.md) docs.
+- launch vaults
+- Somnia agents
+- reactive automation
+- live markets
+- orderbook exits
+- settlement and redemption
+
+See [Agents & Reactivity](../architecture/agents-and-reactivity.md) and [Settlement on Somnia](../how-it-works/settlement.md) for the automation path.

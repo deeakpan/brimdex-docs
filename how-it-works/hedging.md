@@ -1,44 +1,60 @@
-# Hedging
+# Hedging & Risk
 
-Because BOUND and BREAK prices always sum to 1.00, you can use the two sides of a market to hedge an existing position or reduce your directional risk.
+BOUND and BREAK are complementary outcomes, so traders can use them to shape risk rather than hold a pure one-sided view.
 
+## Common ways users manage risk
 
-## The basic hedge
+### Add the other side
 
-If you hold BOUND tokens and the price is moving toward the band boundary, you can buy BREAK tokens to offset potential losses.
+If you already hold BOUND and the market starts leaning BREAK, you can buy some BREAK to reduce your net exposure.
 
-```
-You hold: 500 BOUND @ avg price 0.60
-Market now: BOUND = 0.45, BREAK = 0.55
+### Exit on the orderbook
 
-You buy BREAK to hedge your BOUND exposure.
-If BREAK wins → BREAK payout offsets BOUND loss
-If BOUND wins → BOUND payout, BREAK is worthless
-```
+If you do not want a two-sided position, you can instead reduce or close the trade on the orderbook.
 
-A full hedge (buying both sides in proportion) locks in a small loss equal to the 2% trade fee, but eliminates binary outcome risk.
+### Scale into timeframes
 
+Some users spread exposure across:
 
-## Partial hedge
+- different durations
+- different band widths
+- different assets
 
-Buying a smaller BREAK position relative to your BOUND holding reduces volatility without fully neutralizing the position. You still profit if BOUND wins, but your downside is capped.
+That can reduce reliance on one single short-term range outcome.
 
+## What makes Brimdex hedging different
 
-## Selling on the orderbook
+Brimdex is curve-based:
 
-An alternative to buying the other side: **sell** your existing tokens on the **orderbook** at a price you choose. This exits the position entirely rather than creating a two-sided hedge.
+- every trade moves the LMSR state
+- larger hedges can worsen your own execution
+- small-seed markets are more sensitive to self-impact
 
-Whether to hedge or sell depends on:
-- Current token prices on the orderbook vs primary market
-- Transaction cost (two buys vs one sell)
-- Whether you think the position will recover
+So hedge sizing matters a lot.
 
+## LP risk is different from trader risk
 
-## Hedging as a market maker
+Traders choose BOUND or BREAK directly.
 
-Advanced users can buy both sides at the same time when they believe the market is mispriced. If BOUND is at 0.30 and BREAK is at 0.70, but you think the true probability is 50/50, buying BOUND adds pressure that pushes prices back toward equilibrium — and your BOUND position profits when the price normalizes.
+LPs do not, but LPs still carry:
 
+- inventory risk
+- path dependence from order flow
+- settlement exposure through the resolved LP pool
 
-## Important note on parimutuel hedging
+That is why LP sizing should be matched to:
 
-Unlike a prediction market with fixed odds, Brimdex prices shift with every buy. A large hedge buy moves the price of both sides. Factor in price impact when sizing hedge positions.
+- expected trade size
+- market duration
+- expected volatility of the asset
+
+## Practical takeaway
+
+Shorter markets with larger average trades generally need:
+
+- larger seed, or
+- smaller clip sizes
+
+Otherwise traders get poor fills and LP outcomes can swing hard.
+
+See [Pricing & Liquidity](../key-concepts/prices.md) and [Liquidity & Vaults](liquidity-providing.md) for the capital trade-off.

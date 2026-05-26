@@ -1,45 +1,57 @@
-# BrimdexOrderBook
+# CTF Orderbook
 
-Onchain CLOB (Central Limit Order Book) for trading BOUND and BREAK tokens between users. No minting — only token transfers.
+`BrimdexCTFOrderBook` is the secondary market for Brimdex outcome positions.
 
-**Somnia testnet (current):** `0x1FDFfe2650a092a804B53cDC6c9269957BA64726` — same as `orderBook` in repo `deployments.json`.
+**Source:** `smart-contract/orderbook/BrimdexCTFOrderBook.sol`
 
-**Source:** [`BrimdexOrderBook.sol`](https://github.com/deeakpan/Brimdex-contracts/blob/main/BrimdexOrderBook.sol)
+## What it does
 
-## Key functions
+The orderbook lets users trade existing BOUND / BREAK exposure peer-to-peer instead of always crossing the LMSR curve.
 
-### `placeSellOrder(market, isBound, amount, limitPrice)`
-List BOUND or BREAK tokens for sale at a limit price. Tokens are moved to escrow. If buy orders exist at or above `limitPrice`, the order matches immediately.
+It is built for:
 
-### `placeBuyOrder(market, isBound, amount, limitPrice)`
-Bid for BOUND or BREAK tokens at a limit price. USDC (`amount × limitPrice / 1e18 + fee`) is moved to escrow. Matches against resting sell orders at or below `limitPrice`.
+- early exit
+- price-specific orders
+- secondary liquidity
 
-### `cancelSellOrder(orderId)`
-Return escrowed tokens to the seller.
+## Key behavior
 
-### `cancelBuyOrder(orderId)`
-Return escrowed USDC to the buyer.
+The orderbook:
 
-## Matching
+- escrows tokens or USDC
+- matches bids and asks by price
+- settles fills between users
+- keeps market books isolated by market address and side
 
-- Incoming sell hits bids at **≥ limit price** (best bid first)
-- Incoming buy hits asks at **≤ limit price** (best ask first)
-- Matches execute at the **resting order's price** (maker pricing)
-- Partial fills are supported — remaining amount stays open
+## Why it is called CTF orderbook
 
-## Fees
+The orderbook is designed around the conditional-token outcome model used by the Brimdex stack. It is therefore the secondary venue for the same BOUND / BREAK market state that the LMSR market maker prices.
 
-0.5% per side on matched notional, taken from USDC escrow at fill time on each side of the match.
+## Main actions
 
-## Per-market isolation
+- place a buy order
+- place a sell order
+- cancel an open order
+- fill against resting liquidity
 
-Every order is associated with a specific market address. The contract rejects orders for unregistered markets.
+## Important limits
 
-## State
+The orderbook does **not**:
 
-| Variable | Description |
-|---|---|
-| `feeRate` | 0.5% per side |
-| `marketFactory` | Reference to BrimdexFactory for market validation |
-| `orders` | Mapping of orderId → Order |
-| Price level linked lists | Sorted bid/ask queues per market per side |
+- mint new market exposure
+- determine the winning side
+- settle the market itself
+
+Settlement still happens through the Somnia settlement path, not through the orderbook.
+
+## Relationship to LMSR
+
+The LMSR gives immediate execution.
+
+The orderbook gives:
+
+- limit prices
+- peer-to-peer exits
+- an alternative execution surface
+
+Both can coexist for the same market.

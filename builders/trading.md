@@ -1,75 +1,48 @@
-# Trading via Contract
+# Trading Integration
 
-**Audience:** integrators and developers. For the **in-app** flow (wallet prompts, approvals, slippage), see [Trading (how it works)](../how-it-works/trading.md).
+**Audience:** integrators and developers. For the user-facing flow, see [AMM Trading](../trading/amm-trading.md).
 
-How to execute buys programmatically using `BrimdexRouter`.
+## Recommended path
 
+Use `BrimdexLMSRRouter` for primary-market execution.
 
-## Setup
+The current core entry point is:
 
-```js
-const router = new ethers.Contract(ROUTER_ADDRESS, ROUTER_ABI, signer);
-const usdc   = new ethers.Contract(USDC_ADDRESS, ERC20_ABI, signer);
-```
+- `tradeLmsr(LMSRMarketMaker market, int256[] outcomeTokenAmounts, int256 collateralLimit)`
 
+## What the trade call expresses
 
-## One-time approval
+At a high level, the trade call communicates:
 
-```js
-await usdc.approve(ROUTER_ADDRESS, ethers.MaxUint256);
-```
+- which market you are trading against
+- which outcome inventory change you want
+- how much collateral you are willing to spend or receive
 
-Or approve per-trade with the exact amount.
+Because this is an LMSR / conditional-token style trade surface, the router uses outcome token deltas rather than the old dedicated `buyBound` / `buyBreak` helpers.
 
+## Approval model
 
-## Buy BOUND
+Builders should:
 
-```js
-const amount       = 100_000_000n;  // $100 USDC (6 decimals)
-const minTokensOut = 0n;            // set a real value for slippage protection
+1. approve the collateral token
+2. call the router with the desired trade shape
+3. inspect the resulting market and position state
 
-await router.buyBound(marketAddress, amount, minTokensOut);
-```
+## Slippage and limits
 
+The `collateralLimit` parameter is the core user-protection input.
 
-## Buy BREAK
+Your integration should set it conservatively so the transaction reverts if execution is materially worse than expected.
 
-```js
-await router.buyBreak(marketAddress, amount, minTokensOut);
-```
+## Reading before trading
 
+Before sending a trade, most builders should read:
 
-## Calculating minTokensOut
+- current marginal price from `LMSRMarketMaker`
+- current market stage
+- expiry state
+- user allowance and balance
 
-Fetch the estimated tokens first, then apply your acceptable slippage:
+## Secondary trading
 
-```js
-const estimated    = await market.getEstimatedTokens(true, amount);
-const slippageBps  = 50n; // 0.5%
-const minTokensOut = estimated * (10000n - slippageBps) / 10000n;
-
-await router.buyBound(marketAddress, amount, minTokensOut);
-```
-
-
-## Redeeming after settlement
-
-```js
-const market = new ethers.Contract(marketAddress, MARKET_ABI, signer);
-
-// isBound = true for BOUND tokens, false for BREAK tokens
-await market.redeem(isBound, tokenAmount);
-```
-
-
-## Direct market interaction (no router)
-
-If you want to call the market directly:
-
-```js
-// Approve the market directly (not the router)
-await usdc.approve(marketAddress, amount);
-await market.buyBound(amount, recipientAddress, minTokensOut);
-```
-
-The recipient can be any address — useful for buying on behalf of another wallet.
+If you want price-specific execution instead of immediate LMSR execution, integrate `BrimdexCTFOrderBook` instead of the router.

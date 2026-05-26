@@ -1,66 +1,54 @@
-# Contract Overview & Addresses
+# Contract Overview
 
-All Brimdex contracts are deployed on the **Somnia Testnet**.
+Brimdex now runs on an **LMSR + conditional tokens + launch vault** stack, with settlement automation anchored on **Somnia**.
 
-## Addresses
+## Source of truth
 
-Somnia Testnet deployment (from repo `deployments.json`, 2026-04-11).
+The current contract source lives in:
 
-| Contract / library | Address |
+- `smart-contract/`
+- `LMSR/Brimdex/`
+
+The current deployment data should be read from:
+
+- `deployments.json`
+- app contract maps such as `app/contracts.ts`
+
+This page intentionally avoids freezing old addresses into static documentation.
+
+## Contract groups
+
+| Group | Main contracts | Purpose |
+|---|---|---|
+| Raise | `BrimdexStackLaunchVault` | Collect commitments and open markets from a vault |
+| LMSR | `BrimdexLMSRStackFactory`, `LMSRMarketMaker`, `BrimdexLMSRRouter`, `BrimdexFeeConfig` | Create, quote, trade, and fee-configure the primary market |
+| Conditional tokens | `BrimdexConditionalTokens`, `BrimdexAssetRegistry` | Outcome accounting and settlement state |
+| Oracle / automation | `BrimdexFeeds`, `BrimdexReactivityCoordinator`, `BrimdexLaunchOpenCoordinator`, `BrimdexFeedAgentPuller` | Feed storage and reactive launch / settlement |
+| Secondary market | `BrimdexCTFOrderBook` | Peer-to-peer trading of outcome positions |
+
+## Canonical flow
+
+1. `BrimdexStackLaunchVault` collects commitments
+2. `BrimdexLMSRStackFactory` opens the market when authorized
+3. `LMSRMarketMaker` handles live primary trading
+4. `BrimdexCTFOrderBook` handles secondary exits
+5. `BrimdexFeeds` plus the coordinator stack drive launch and settlement on Somnia
+6. traders and LPs redeem from the settled state
+
+## Network assumptions
+
+- settlement chain: **Somnia**
+- collateral: **USDC-style 6 decimal asset**
+- automation: **Somnia Reactivity + agents**
+
+## Pages in this section
+
+| Page | What it covers |
 |---|---|
-| `BrimdexFactory` | `0x14c005488847182d9fa5AEFCC4e6f8927e900804` |
-| `BrimdexRouter` | `0x180a07de7BC493Ff11E66e129c8B520BbA204299` |
-| `BrimdexOrderBook` | `0x1FDFfe2650a092a804B53cDC6c9269957BA64726` |
-| `BrimdexFeeds` | `0xe24cB9468a690E33dDbC365BD29F8E1B53e48F93` |
-| `USDC (collateral)` | `0x4b6E2382570b840d3B5E52B042E2F9d5dB23d3fE` |
-| `Treasury` | `0x68ac96Ce64D62386b1A5E2DFf8f0F01fEEd46E09` |
-| `OrderBookLinkedList` | Inlined in `BrimdexOrderBook` (no separate library deployment). |
-
-> Markets and vaults are deployed per-market via `BrimdexFactory`. Use `factory.getAllMarkets()` to enumerate them.
-
-## Network details
-
-| Property | Value |
-|---|---|
-| Network | Somnia Testnet |
-| Chain ID | `50312` |
-| RPC | `https://dream-rpc.somnia.network` |
-| Explorer | `https://shannon-explorer.somnia.network` |
-| Currency | STT |
-
-## Architecture diagram
-
-```
-User
- │
- ├── BrimdexRouter ──────────────────► BrimdexMarket
- │        │                              │        │
- │   (approval mgmt)              buyBound    buyBreak
- │                                     │        │
- │                               MarketLiquidityVault
- │                                (seed + fees + exit)
- │
- └── BrimdexOrderBook ──────────── BOUND / BREAK tokens
-          (peer-to-peer)
-```
-
-## Contract pages
-
-| Contract | Description |
-|---|---|
-| [BrimdexMarket](brimdex-market.md) | Core parimutuel market |
-| [BrimdexFactory](brimdex-factory.md) | Market deployment |
-| [BrimdexOrderBook](brimdex-orderbook.md) | Secondary token market |
-| [MarketLiquidityVault](market-liquidity-vault.md) | LP seed vault |
-| [BrimdexRouter](brimdex-router.md) | User entry point |
-
-## Source repository
-
-- [BrimdexFactory.sol](https://github.com/deeakpan/Brimdex-contracts/blob/main/BrimdexFactory.sol)
-- [BrimdexMarket.sol](https://github.com/deeakpan/Brimdex-contracts/blob/main/BrimdexMarket.sol)
-- [BrimdexOrderBook.sol](https://github.com/deeakpan/Brimdex-contracts/blob/main/BrimdexOrderBook.sol)
-- [BrimdexRouter.sol](https://github.com/deeakpan/Brimdex-contracts/blob/main/BrimdexRouter.sol)
-- [MarketLiquidityVault.sol](https://github.com/deeakpan/Brimdex-contracts/blob/main/MarketLiquidityVault.sol)
-- [BrimdexFeeds.sol](https://github.com/deeakpan/Brimdex-contracts/blob/main/BrimdexFeeds.sol)
-- [BrimdexParimutuelToken.sol](https://github.com/deeakpan/Brimdex-contracts/blob/main/BrimdexParimutuelToken.sol)
-- [IDataStreams.sol](https://github.com/deeakpan/Brimdex-contracts/blob/main/IDataStreams.sol)
+| [LMSR Stack Factory](brimdex-factory.md) | Stack deployment and vault-authorized market opening |
+| [LMSR Market Maker](brimdex-market.md) | Live primary market execution and resolution |
+| [Stack Launch Vault](market-liquidity-vault.md) | Commitment collection and LP redemption |
+| [LMSR Router](brimdex-router.md) | User-facing trading entry point |
+| [CTF Orderbook](brimdex-orderbook.md) | Secondary market for outcome positions |
+| [Fee Config](brimdex-fee-config.md) | Centralized fee policy |
+| [Feeds & Coordinators](feeds-and-coordinators.md) | Feed storage and reactive automation |

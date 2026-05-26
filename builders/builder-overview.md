@@ -1,33 +1,52 @@
 # Builder Overview
 
-This section is for **developers** integrating with Brimdex (bots, dashboards, scripts). It includes **contract calls, ABIs, and code**.
+This section is for developers integrating with the current Brimdex stack.
 
-**Using the product?** Read [How it works](../how-it-works/how-it-works-overview.md) and [Key concepts](../key-concepts/key-concepts-overview.md) first—they describe the **UI** (wallet prompts, approvals, trading steps). Technicalities live here and under [Contracts](../contracts/contract-overview.md).
+## What builders are integrating with
+
+The live architecture is:
+
+- `BrimdexLMSRStackFactory`
+- `BrimdexStackLaunchVault`
+- `LMSRMarketMaker`
+- `BrimdexLMSRRouter`
+- `BrimdexCTFOrderBook`
+- `BrimdexFeeds` and the coordinator contracts
 
 ## What you need
 
 | Item | Value |
 |---|---|
-| Network | Somnia Testnet (Chain ID `50312`) |
-| RPC | `https://dream-rpc.somnia.network` |
-| Factory address | See [Contract Addresses](../contracts/contract-overview.md) |
-| Router address | See [Contract Addresses](../contracts/contract-overview.md) |
-| Collateral | USDC (6 decimals) |
+| Canonical execution chain | Somnia |
+| Collateral | USDC-style 6 decimals |
+| Market maker | LMSR |
+| Outcome model | CTF-backed BOUND / BREAK |
+| Settlement automation | Somnia Reactivity + agents |
 
-## Entry points
+## Typical integration entry points
 
-For most integrations, you only need two contracts:
+For most builders, the main touchpoints are:
 
-- **`BrimdexFactory`** — enumerate markets, get token addresses, check market state
-- **`BrimdexRouter`** — execute buys with slippage protection
+- `BrimdexLMSRStackFactory` to discover markets and launch vaults
+- `BrimdexLMSRRouter` to execute primary trades
+- `BrimdexCTFOrderBook` to read or place secondary orders
+- `BrimdexFeeds` or indexed APIs to inspect supported assets and feed state
 
-If you want lower-level control (e.g., direct market interaction), you can call `BrimdexMarket` directly — but you'll need to handle per-market USDC approvals yourself.
+## What to read first
 
-## Pages in this section
+- [Contract Overview](../contracts/contract-overview.md)
+- [Architecture Overview](../architecture/architecture-overview.md)
+- [Agents & Reactivity](../architecture/agents-and-reactivity.md)
 
-| Page | What it covers |
-|---|---|
-| [Fetching Markets](fetching-markets.md) | Reading market list, state, prices |
-| [Trading via Contract](trading.md) | Executing buys programmatically |
-| [Reading Positions](reading-positions.md) | Token balances, pending payouts |
-| [Contract Interfaces](contract-interfaces.md) | Minimal ABIs for integration |
+## Builders section map
+
+| Section | Page | What it covers |
+|---|---|---|
+| Data & APIs | [Market Data](fetching-markets.md) | Market discovery, vault state, and live odds |
+| Data & APIs | [API Usage](api-usage.md) | How to use the public Brimdex API surface |
+| Data & APIs | [Positions & Redemptions](reading-positions.md) | Reading trader and LP state |
+| Integration | [Trading Integration](trading.md) | Executing primary trades programmatically |
+| Integration | [Events & Reactivity](events-and-reactivity.md) | Event-driven sync and reactive update patterns |
+| Integration | [Contracts & ABIs](contract-interfaces.md) | Artifact sources and high-signal interfaces |
+
+The contract section is still the source of truth for exact stack naming and contract responsibilities, but `Builders` is now the practical integration path.

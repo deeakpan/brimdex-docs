@@ -1,49 +1,78 @@
-# Positions & Tokens
+# Positions & Redemptions
 
-Every position on Brimdex is a **standard token balance** in your wallet. When you **buy** on the primary market, tokens are **minted** to you. When you **redeem** or **sell**, they’re **burned** or **transferred**.
+Brimdex positions are tokenized claims on a specific market outcome.
 
+For every market, the trader-facing outcomes are:
 
-## BOUND and BREAK tokens
+- **BOUND**
+- **BREAK**
 
-Each market has two ERC-20 tokens:
+## What you actually hold
 
-| Token | Wins when | Symbol example |
-|---|---|---|
-| **BOUND** | Final price is inside the band | e.g. tied to BTC + duration |
-| **BREAK** | Final price is outside the band | e.g. tied to BTC + duration |
+When you buy through the main Brimdex trading flow, you receive outcome exposure that the UI presents as your BOUND or BREAK position for that market.
 
-Both sides use the same underlying collateral model (USDC in the pool). Token amounts use **6 decimals**, consistent with USDC.
+Under the hood, Brimdex uses an automated primary market plus an orderbook for secondary trading and exit.
 
+So the important user mental model is simple:
 
-## How you get tokens
+- your position balance is your claim on BOUND or BREAK
+- if your side wins, you can redeem
+- if your side loses, it does not redeem
 
-When you **confirm a buy** in the app, the protocol mints tokens based on the **live pool price** and the **USDC you spend** (after the primary-market fee). You don’t mint manually—the **Buy** flow does it.
+## How positions are created
 
+Positions are created when you trade:
 
-## How tokens go away
+1. choose a market
+2. choose **BOUND** or **BREAK**
+3. enter a USDC amount
+4. sign the trade
+5. receive the corresponding position balance
 
-1. **Redeem after settlement** — if you hold **winning** tokens, the app’s **redeem** flow burns them and sends you USDC.  
-2. **Sell on the orderbook** — tokens transfer to the buyer; nothing is burned.  
-3. **Rare recovery paths** — if settlement is stuck for a long time, there may be a **recovery** option for traders (see [Settlement](../how-it-works/settlement.md)); the product UI reflects what’s available.
+## How positions change
 
+Positions can change in three ways:
 
-## Transferability
+### 1. You buy more
 
-BOUND and BREAK are normal ERC-20s. You can hold them in your wallet, **sell** on the orderbook, or send them to another address if your wallet supports it.
+Your balance increases.
 
+### 2. You sell on the orderbook
 
-## Seeing your position
+Your balance decreases as another user takes the other side.
 
-In the app, your **position** is your **token balance** for that market’s BOUND or BREAK token—shown on the market page, portfolio, or similar views. You don’t need contract addresses for day-to-day use.
+### 3. You redeem after settlement
 
+Winning balance is redeemed for USDC and your redeemable token balance drops accordingly.
+
+## What the app should show
+
+For a useful position view, Brimdex surfaces:
+
+- current BOUND / BREAK balance
+- entry / cost basis
+- current status
+- whether the market is settled
+- whether the position is redeemable
 
 ## After settlement
 
-- **Winning** tokens can be **redeemed** for USDC at the published rate.  
-- **Losing** tokens are worth zero for redemption.  
-- Winning tokens **don’t expire** on a clock—you can redeem when you’re ready.
+After the market resolves:
 
+- **winning** positions can be redeemed for USDC
+- **losing** positions remain non-redeemable
+- the protocol publishes the final payout state on Somnia
 
-## For builders
+Brimdex settlement is designed so the outcome is written on Somnia and the redeem flow reads the same canonical settlement result.
 
-Resolving token addresses and calling `balanceOf` onchain is covered in [Fetching markets](../builders/fetching-markets.md) and [Contract interfaces](../builders/contract-interfaces.md).
+## LP commitment tokens
+
+Launch vault participants are a different class of holder from traders.
+
+When you commit to a launch vault, you receive:
+
+- **commitment tokens** representing your share of the launch vault
+
+After the market resolves, those commitment tokens are burned to redeem your share of the LP pool.
+
+See [Liquidity & Vaults](../how-it-works/liquidity-providing.md) for that flow.

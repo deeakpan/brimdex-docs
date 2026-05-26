@@ -1,30 +1,62 @@
-# Settlement
+# Settlement on Somnia
 
-When the **expiry time** passes, the market **stops taking new primary buys** and the protocol **finalizes the outcome** using the live oracle price. You don’t run a separate “settle” action in the app as a trader—the network keeps this automated so winners can redeem.
+Brimdex chooses **Somnia** as the canonical settlement chain.
 
-## Who wins?
+That means:
 
-- **BOUND** wins if the final oracle price is **on or inside** the market’s lower and upper bounds.
-- **BREAK** wins if the final price is **below the lower bound** or **above the upper bound**.
+- the market expires on Somnia
+- the settlement trigger runs on Somnia
+- the final oracle write is processed on Somnia
+- redemptions read the settled state from Somnia
 
-## What happens to payouts
+## What triggers settlement
 
-The **trader pool** (the USDC from traders, after the usual fees on buys) is shared among **holders of the winning token**. Seed liquidity is handled separately so LPs get their principal back through the LP flow, not as a directional bet.
+Brimdex uses:
 
-If you hold **winning** tokens after settlement, the app lets you **redeem**: you sign a transaction and USDC returns to your wallet. Partial redemptions are fine—you choose how many tokens to cash in.
+- **Somnia Reactivity** for scheduling and triggering
+- **onchain agents** for pulling the required price data
 
-## Oracle freshness
+Once the final settlement trigger is available, Brimdex is designed for **sub-2s reactive settlement**.
 
-Finalization needs a **recent** oracle reading. If data is temporarily stale, settlement may wait until a fresh price is available; the app will still show the market as pending resolution until that completes.
+## Who wins
 
-## Liquidity providers
+- **BOUND** wins if the final price is inside or on the quoted range
+- **BREAK** wins if the final price is outside the range
 
-After settlement, LPs use the **LP / vault** flow in the app to **exit once** and receive accumulated fees plus their share of returned principal. See [Liquidity providing](liquidity-providing.md).
+## Settlement flow
 
-## If something goes wrong
+1. Market reaches expiry
+2. Reactivity schedules the settlement path
+3. Onchain agents fetch the needed final price
+4. The market resolves on Somnia
+5. Traders can redeem winning positions
+6. LPs can redeem the resolved vault pool
 
-If settlement were **unable to complete** for an extended time after expiry, the protocol includes a **last-resort path** for traders to recover a **pro-rata share** of trader funds (not a “winning” payout). This is rare; the UI or docs will reflect the current product behavior if that path is exposed.
+## Why Brimdex keeps settlement on Somnia
 
-## Integrators & builders
+Brimdex may serve multichain users, but keeping settlement on one chain provides:
 
-Automation, onchain settlement and redeem methods, emergency paths, and exact accounting are documented in [Brimdex Market](../contracts/brimdex-market.md) and the [Builders](../builders/builder-overview.md) section.
+- one canonical market state
+- deterministic automation
+- faster reactive finalization
+- simpler redemption logic
+
+See [Multichain with Stargate](../architecture/multichain-and-stargate.md) for the access model.
+
+## Redemption
+
+After the market resolves:
+
+- winning traders redeem their BOUND or BREAK positions
+- losing positions do not redeem
+- LPs redeem their share of the vault's resolved LP pool
+
+## Safety checks
+
+Settlement still depends on:
+
+- a valid final price
+- acceptable oracle freshness
+- the onchain automation path being ready
+
+If the final price path is not ready yet, the market can remain pending for a short time instead of settling against stale data.

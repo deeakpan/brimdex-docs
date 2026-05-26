@@ -1,67 +1,72 @@
-# MarketLiquidityVault
+# Stack Launch Vault
 
-Per-market LP vault. Accepts USDC deposits, seeds the market, accumulates streaming fees, and returns principal at settlement.
+`BrimdexStackLaunchVault` is the LP-side capital formation contract for Brimdex markets.
 
-**Source:** [`MarketLiquidityVault.sol`](https://github.com/deeakpan/Brimdex-contracts/blob/main/MarketLiquidityVault.sol)
+**Source:** `smart-contract/raise/BrimdexStackLaunchVault.sol`
 
+## What it does
+
+The launch vault:
+
+- accepts USDC commitments for a future market
+- mints commitment tokens to LPs
+- tracks whether the required notional has been reached
+- opens the committed market once the launch flow completes
+- holds the resolved LP pool for post-settlement redemption
+
+## Main phases
+
+| Phase | Meaning |
+|---|---|
+| Funding | Vault is accepting commitments |
+| Ready to open | Required notional has been reached |
+| Live market | Vault has opened the market and LP capital is active |
+| Aborted | Target was missed before the deadline |
+| Redeemable | Market has resolved and LPs can claim their share |
 
 ## Key functions
 
-### `deposit(usdcAmount)`
-Deposit USDC into the vault. Mints shares at current NAV. Open before and during the active epoch.
+### `commit(uint256 requested)`
 
-### `exit()`
-After market settlement only. Burns all your shares and sends:
-- Accumulated fee earnings
-- Pro-rata share of returned seed principal
+Commits USDC into the vault during the funding window and mints commitment tokens.
 
+### `openCommittedMarket()`
 
-## Share pricing
+Moves the vault from commitment mode into the live market-open path once the conditions are satisfied.
 
-```
-mintShares = usdcAmount × totalShares / totalNAV
-totalNAV   = vaultBalance + totalDeployed
-```
+### `redeemCommitment()`
 
-`totalDeployed` tracks USDC currently in the market (not yet returned), so NAV is accurate at all times.
+Lets LPs redeem after:
 
+- the vault aborts because target was missed, or
+- the resolved LP pool is available after settlement
 
-## Fee distribution
+## Important vault properties
 
-```solidity
-// Called by market on each trade
-accRewardPerShare += (feeAmount × PRECISION) / totalShares;
-```
+The vault carries the market template needed to open the market later:
 
-Your pending fees:
-```
-live    = (shares × accRewardPerShare / PRECISION) − rewardDebt
-total   = live + pendingFeeCredit
-```
+- `assetKey`
+- commitment deadline
+- required notional
+- band bps
+- horizon seconds
 
-`pendingFeeCredit` accumulates harvested fees from re-deposits — guarantees no fees are lost when adding to your position.
+It also tracks the LP-side pool that comes back after settlement.
 
+## Why commitment tokens matter
 
-## Key state
+Commitment tokens are the LP accounting unit for the market:
 
-| Variable | Description |
-|---|---|
-| `targetSeed` | USDC required to seed the market (immutable) |
-| `seedFinalized` | True after seed has been pulled to market |
-| `totalShares` | Sum of all LP shares |
-| `sharesOf` | LP address → share balance |
-| `accRewardPerShare` | Global fee reward index |
-| `rewardDebt` | LP address → fee debt checkpoint |
-| `pendingFeeCredit` | LP address → harvested unclaimed fees |
-| `principalBalance` | Returned seed USDC awaiting LP exit |
-| `totalDeployed` | USDC in market not yet returned |
+- they represent proportional ownership of the launch vault
+- they are burned when LPs redeem
+- they are separate from trader BOUND / BREAK positions
 
+## Why this contract matters
 
-## View functions
+This vault is the entry point for LP capital and the bridge between:
 
-| Function | Returns |
-|---|---|
-| `pendingFees(user)` | Unclaimed fee USDC |
-| `principalShareUsdc(user)` | Pro-rata principal share |
-| `totalExitUsdc(user)` | Total USDC on exit |
-| `totalNAV()` | Current vault NAV |
+- pre-launch capital formation
+- live LMSR market activation
+- post-settlement LP redemption
+
+See [Market Lifecycle](../key-concepts/market-lifecycle.md) for the product flow and [LMSR Stack Factory](brimdex-factory.md) for the opening path.

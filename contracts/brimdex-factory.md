@@ -1,77 +1,61 @@
-# BrimdexFactory
+# LMSR Stack Factory
 
-Deploys and starts markets in a single transaction. Maintains the registry of all active markets.
+`BrimdexLMSRStackFactory` is the deployment and orchestration contract for the Brimdex LMSR stack.
 
-**Source:** [`BrimdexFactory.sol`](https://github.com/deeakpan/Brimdex-contracts/blob/main/BrimdexFactory.sol)
+**Source:** `smart-contract/lmsr/BrimdexLMSRStackFactory.sol`
 
+## What it does
 
-## Market creation flow
+The factory is responsible for:
 
-```
-Owner approves factory for seedPrincipal USDC
-       ↓
-factory.createMarket(...)
-       ├── Deploy BrimdexParimutuelToken (BOUND)
-       ├── Deploy BrimdexParimutuelToken (BREAK)
-       ├── Deploy BrimdexMarket
-       ├── Deploy MarketLiquidityVault
-       ├── Pull seedPrincipal USDC from owner → factory
-       ├── depositFor(owner, seedPrincipal) → vault (owner gets LP shares)
-       ├── vault.pullSeedToMarket() → market
-       └── market.initialize() → reads oracle, sets bounds, opens trading
-```
+- creating launch vaults
+- authorizing vault-driven opens
+- opening markets once launch conditions are satisfied
+- registering the market with the conditional-token system
+- deploying and wiring the LMSR market maker
+- binding the market maker to the condition
 
-All in one transaction.
+## Why it matters
 
+Brimdex does not open markets as isolated contracts with hand-managed setup.
 
-## Key functions
+The factory creates a repeatable stack so every market follows the same path:
 
-### `createMarket(...)`
+1. launch vault exists
+2. vault reaches target
+3. factory opens the market
+4. market is registered against the asset key and range
+5. the LMSR becomes live on Somnia
 
-```solidity
-function createMarket(
-    string memory name,           // 1–8 characters
-    uint256 expiryTimestamp,
-    uint256 timeframeDuration,
-    string memory feedName,       // e.g. "BTC/USD"
-    uint256 bandPercent,          // e.g. 200 = 2%
-    string memory boundTokenName,
-    string memory boundTokenSymbol,
-    string memory breakTokenName,
-    string memory breakTokenSymbol
-) external onlyOwner returns (address market, address boundToken, address breakToken, address liquidityVault)
-```
+## Important inputs
 
-Caller must pre-approve this contract for `seedPrincipal` USDC.
+The factory works with:
 
-### `setSeedPrincipal(uint256)`
-Owner only. Sets the USDC amount required to seed new markets.
+- `assetKey`
+- `lowerBound`
+- `upperBound`
+- `expiryTimestamp`
+- collateral asset
+- fee config
+- vault authorization
 
-### `getAllMarkets()`
-Returns all market addresses ever created.
+It also records launch telemetry such as:
 
-### `getMarkets(offset, limit)`
-Paginated market list.
+- `launchOracleSpot6`
+- `launchBandBps`
+- `launchHorizonSeconds`
 
-### `isActiveMarket(name, timeframeDuration, bandPercent)`
-Returns true if a non-expired, non-settled market exists for this slot.
+## Key responsibilities
 
-
-## Registry mappings
-
-| Mapping | Key → Value |
+| Responsibility | Description |
 |---|---|
-| `isMarket` | address → bool |
-| `marketToBoundToken` | market → BOUND token |
-| `marketToBreakToken` | market → BREAK token |
-| `marketToLiquidityVault` | market → vault |
-| `activeMarkets` | slotKey → market |
+| Vault creation | Deploys a `BrimdexStackLaunchVault` for a future market |
+| Market open | Calls the path that registers the market and boots the LMSR |
+| Stack wiring | Connects the vault, LMSR, fee config, and conditional-token system |
+| Asset enforcement | Uses the registered `assetKey` / feed path |
 
+## Related contracts
 
-## Market slot key
-
-```solidity
-keccak256(abi.encodePacked(name, timeframeDuration, bandPercent))
-```
-
-One active market per unique slot at any time.
+- [Stack Launch Vault](market-liquidity-vault.md)
+- [LMSR Market Maker](brimdex-market.md)
+- [Feeds & Coordinators](feeds-and-coordinators.md)

@@ -1,47 +1,61 @@
 # Brimdex Docs
 
-[🌐 brimdex](https://brimdex.markets) · [𝕏 brimdex](https://twitter.com/brimdex) · [✈️ Telegram](https://t.me/brimdex) · [📦 GitHub](https://github.com/deeakpan/Brimdex-contracts) · [🎨 Brand Assets](brand-assets.md)
+[Website](https://brimdex.markets) · [X](https://twitter.com/brimdex) · [Telegram](https://t.me/brimdex) · [GitHub](https://github.com/deeakpan/Brimdex-contracts)
 
-**How it works** and **Key concepts** = product / UI language. **Builders** and **Contracts** = technical integration.
+* [Overview](overview.md)
+* [Brimdex 101](brimdex-101.md)
+* [Supported Assets](supported-assets.md)
+* [Brand Assets](brand-assets.md)
 
----
+* Product
+  * [Product Overview](how-it-works/how-it-works-overview.md)
+  * Trading
+    * [Trading Overview](trading/trading-overview.md)
+    * [AMM Trading](trading/amm-trading.md)
+    * [Orderbook](trading/orderbook.md)
+  * [Liquidity & Vaults](how-it-works/liquidity-providing.md)
+  * [Settlement on Somnia](how-it-works/settlement.md)
+  * [Fees](how-it-works/fees.md)
+  * [Hedging & Risk](how-it-works/hedging.md)
 
-## Get Started
+* Protocol
+  * [Protocol Overview](protocol/protocol-overview.md)
+  * [BDX Token](protocol/bdx-token.md)
+  * [Governance](protocol/governance.md)
+  * Participation
+    * [Staking](protocol/staking.md)
+    * [Locking](protocol/locking.md)
+  * [Audits](protocol/audits.md)
 
-- [Overview](overview.md)
-- [Brimdex 101](brimdex-101.md)
-- [Supported Assets](supported-assets.md)
+* Key Concepts
+  * [Overview](key-concepts/key-concepts-overview.md)
+  * [Bound vs Break](key-concepts/bound-and-break.md)
+  * [Pricing & Liquidity](key-concepts/prices.md)
+  * [Positions & Redemptions](key-concepts/positions-and-tokens.md)
+  * [Market Lifecycle](key-concepts/market-lifecycle.md)
 
-## Key Concepts
+* Architecture
+  * [Architecture Overview](architecture/architecture-overview.md)
+  * [Agents & Reactivity](architecture/agents-and-reactivity.md)
+  * [Multichain with Stargate](architecture/multichain-and-stargate.md)
 
-- [Key Concepts](key-concepts/key-concepts-overview.md)
-- [Prices](key-concepts/prices.md)
-- [Positions & Tokens](key-concepts/positions-and-tokens.md)
-- [The Orderbook](key-concepts/orderbook.md)
-- [Market Lifecycle](key-concepts/market-lifecycle.md)
+* Contracts
+  * [Contract Overview](contracts/contract-overview.md)
+  * [LMSR Stack Factory](contracts/brimdex-factory.md)
+  * [LMSR Market Maker](contracts/brimdex-market.md)
+  * [Stack Launch Vault](contracts/market-liquidity-vault.md)
+  * [LMSR Router](contracts/brimdex-router.md)
+  * [Orderbook Contract](contracts/brimdex-orderbook.md)
+  * [Fee Config](contracts/brimdex-fee-config.md)
+  * [Feeds & Coordinators](contracts/feeds-and-coordinators.md)
 
-## How It Works
-
-- [How It Works](how-it-works/how-it-works-overview.md)
-- [Trading](how-it-works/trading.md)
-- [Hedging](how-it-works/hedging.md)
-- [Liquidity Providing](how-it-works/liquidity-providing.md)
-- [Settlement](how-it-works/settlement.md)
-- [Fees](how-it-works/fees.md)
-
-## Contracts
-
-- [Contract Overview & Addresses](contracts/contract-overview.md)
-- [BrimdexMarket](contracts/brimdex-market.md)
-- [BrimdexFactory](contracts/brimdex-factory.md)
-- [BrimdexOrderBook](contracts/brimdex-orderbook.md)
-- [MarketLiquidityVault](contracts/market-liquidity-vault.md)
-- [BrimdexRouter](contracts/brimdex-router.md)
-
-## Builders
-
-- [Builder Overview](builders/builder-overview.md)
-- [Fetching Markets](builders/fetching-markets.md)
-- [Trading via Contract](builders/trading.md)
-- [Reading Positions](builders/reading-positions.md)
-- [Contract Interfaces](builders/contract-interfaces.md)
+* Builders
+  * [Builder Overview](builders/builder-overview.md)
+  * Data & APIs
+    * [Market Data](builders/fetching-markets.md)
+    * [API Usage](builders/api-usage.md)
+    * [Positions & Redemptions](builders/reading-positions.md)
+  * Integration
+    * [Trading Integration](builders/trading.md)
+    * [Events & Reactivity](builders/events-and-reactivity.md)
+    * [Contracts & ABIs](builders/contract-interfaces.md)

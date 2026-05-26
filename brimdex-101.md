@@ -1,73 +1,86 @@
 # Brimdex 101
 
-A plain-language intro to how Brimdex works.
+Brimdex lets you express one view in a very simple way:
 
+- **BOUND** if you think the asset will stay inside the quoted range
+- **BREAK** if you think the asset will finish outside the quoted range
 
-## The core idea
+The protocol then handles pricing, token issuance, orderbook exits, and settlement on Somnia.
 
-Every market has a **price band** — an upper and lower boundary set at creation around the current oracle price. The market expires at a fixed timestamp.
+## The basic shape of a market
 
-At expiry, one of two things has happened:
+Every market has:
 
-- The asset price is **inside** the band → **BOUND wins**
-- The asset price is **outside** the band → **BREAK wins**
+- an asset, such as `ETH / USD`, `NVDA / USD`, or `XAU / USD`
+- a band, such as `±0.5%`, `±1.5%`, or `±3%`
+- a duration, such as `10m`, `30m`, `2h`, or `1d`
+- one settlement timestamp
 
-You buy a position by purchasing BOUND or BREAK tokens. Winners split the entire trader pool at settlement.
+At expiry there are only two outcomes:
 
+- final price is **inside** the range -> **BOUND**
+- final price is **outside** the range -> **BREAK**
 
-## A simple example
+## Simple examples
 
-> BTC is $65,000. A market opens with band $63,700 – $66,300 (±2%), expiring in 4 hours.
+### Crypto example
 
-| You think | You buy | You win if |
-|---|---|---|
-| BTC stays calm | BOUND | Final price is $63,700–$66,300 |
-| BTC makes a big move | BREAK | Final price is below $63,700 or above $66,300 |
+`ETH / USD · 10m · ±0.5%`
 
+- If ETH settles inside the band, **BOUND** wins
+- If ETH settles below the lower bound or above the upper bound, **BREAK** wins
 
-## How prices work
+### Stock example
 
-Prices are set by the pool ratio — not an order book. The more USDC is in the BOUND pool relative to BREAK, the higher the BOUND price and the lower the expected payout per token.
+`NVDA / USD · 30m · ±1.5%`
 
-```
-BOUND price = boundPool / (boundPool + breakPool)
-BREAK price = breakPool / (boundPool + breakPool)
+- If NVDA stays inside the quoted range, **BOUND** wins
+- If NVDA breaks out of the range, **BREAK** wins
 
-BOUND price + BREAK price = 1.00
-```
+### RWA / commodity example
 
-If BOUND price is 0.70, a BOUND token costs $0.70 and a BREAK token costs $0.30. If BOUND wins, each BOUND holder earns from the combined trader pool.
+`XAU / USD · 2h · ±1.0%`
 
-See [Prices](key-concepts/prices.md) for the full math.
+- If gold stays inside the band, **BOUND** wins
+- If gold settles outside the band, **BREAK** wins
 
+## How trading works
 
-## What is seed liquidity?
+Brimdex uses an automated pricing engine for continuous quotes:
 
-Both pools start with equal USDC — deposited by liquidity providers (LPs) through the **per-market LP vault** in the app. This seed ensures the market has a 50/50 starting price and prevents zero-liquidity edge cases.
+- you can buy immediately without waiting for another user
+- larger orders move price more than smaller orders
+- lower seed means sharper price moves and worse fills
+- larger seed means better depth, but more LP exposure
 
-LPs do **not** take a directional bet. Their principal is returned at settlement regardless of outcome. In return they earn **0.2% of every trade** that flows through the market.
+If you want out before expiry, Brimdex also supports an **orderbook** for secondary trading.
 
-See [Liquidity Providing](how-it-works/liquidity-providing.md).
+## How settlement works
 
+Brimdex chooses to settle on **Somnia**:
 
-## Early exit
+- the market itself lives on Somnia
+- price updates land on Somnia
+- Somnia Reactivity and **onchain agents** coordinate the launch and settlement flow
+- once the final trigger is available, Brimdex is designed for **sub-2s reactive settlement**
 
-Don't want to wait for settlement? You can sell your BOUND or BREAK tokens on the **orderbook** to another user at any time while the market is live.
+## What LPs do
 
-See [The Orderbook](key-concepts/orderbook.md).
+LPs seed the launch vault that opens the market.
 
+They are not guaranteed to get the full seed back:
 
-## Settlement
+- they earn a share of fees
+- they also absorb market-making risk
+- after settlement, LPs redeem their share of the resolved vault proceeds
 
-After expiry, the protocol **finalizes** the market using the oracle price and sets who can redeem. **Winners redeem in the app**—you sign a transaction and USDC returns to your wallet.
-
-See [Settlement](how-it-works/settlement.md).
-
+See [Liquidity & Vaults](how-it-works/liquidity-providing.md) for the full LP flow.
 
 ## Summary
 
-1. A market opens with a price band and expiry
-2. You buy BOUND (price stays in) or BREAK (price breaks out)
-3. Pools are seeded by LPs; prices update with every trade
-4. Hold to settlement and redeem, or sell early on the orderbook
-5. Winners split the trader pool pro-rata at settlement
+1. A launch vault collects USDC commitments
+2. Reactivity and agents open the market on Somnia
+3. Traders buy BOUND or BREAK
+4. Users can hold to expiry or exit through the orderbook
+5. Somnia settlement resolves the market and winners redeem
+6. LPs redeem the resolved vault proceeds

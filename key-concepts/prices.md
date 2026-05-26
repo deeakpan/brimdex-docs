@@ -1,77 +1,95 @@
-# Prices
+# Pricing & Liquidity
 
-Brimdex uses a **parimutuel pricing model** — prices are derived entirely from pool ratios and update automatically with every trade. There is no order book for the primary market, no spread, and no liquidity requirement from a counterparty.
+Brimdex uses an automated pricing curve for continuous pricing.
 
+That means:
 
-## The formula
+- quotes are always available while the market is live
+- price moves after every trade
+- larger markets feel smoother than smaller markets
+- seed size directly affects slippage and LP exposure
 
-```
-BOUND price = boundPool / (boundPool + breakPool)
-BREAK price = breakPool / (boundPool + breakPool)
-```
+## Reading price
 
-These always sum to exactly **1.0**. Think of them as implied probabilities — if BOUND is priced at 0.65, the market implies a 65% chance the price stays in the band.
+Brimdex prices BOUND and BREAK as values between `0` and `1`.
 
+Examples:
 
-## Starting price
+- `BOUND = 0.50`, `BREAK = 0.50` -> market starts balanced
+- `BOUND = 0.63`, `BREAK = 0.37` -> market is leaning toward the price finishing inside the range
+- `BOUND = 0.22`, `BREAK = 0.78` -> market expects a breakout more than containment
 
-Both pools are seeded equally at market creation:
+These are best read as **market odds**, not guarantees.
 
-```
-boundPool = seedPrincipal / 2
-breakPool = seedPrincipal / 2
-```
+## What makes prices move
 
-This gives a 50/50 starting price — no directional bias at open.
+The two main drivers are:
 
+1. **trade flow**
+2. **seed / funding depth**
 
-## How a buy moves the price
+More seed means:
 
-When a trader buys BOUND with $X USDC (after the 2% fee):
+- tighter execution
+- slower price movement per trade
+- better fills for larger users
+- more capital at risk for LPs
 
-```
-netToPool = X × 0.98
-tokens    = netToPool / price_before
-boundPool += netToPool
-```
+Less seed means:
 
-The new BOUND price is now higher (more USDC in the bound pool), and BREAK price falls correspondingly. Each buy shifts the ratio.
+- sharper odds movement
+- worse fills on bigger clips
+- more expressive short-term markets
+- lower absolute LP bankroll at risk
 
+## Why your fill changes with size
 
-## Example
+Because Brimdex is curve-based, a `25 USDC` trade and a `500 USDC` trade do not get the same execution quality.
 
-| State | boundPool | breakPool | BOUND price | BREAK price |
-|---|---|---|---|---|
-| After seed | $10 | $10 | 0.50 | 0.50 |
-| After $20 BOUND buy | $29.60 | $10 | 0.748 | 0.252 |
-| After $10 BREAK buy | $29.60 | $19.80 | 0.599 | 0.401 |
+If seed is small relative to trade size:
 
-> Pool values above are net of fees for illustration.
+- the order moves the market materially
+- the average price paid is worse
+- the displayed odds can jump quickly
 
+This is why short-duration markets often need either:
 
-## Token quantity
+- smaller clip sizes, or
+- larger seed
 
-The number of tokens you receive for a given USDC amount:
+## Odds versus displayed pool number
 
-```
-tokens = netToPool / price
-```
+Two different ideas matter on the UI:
 
-At a BOUND price of 0.50 with $100 net USDC, you get 200 BOUND tokens.
-At 0.75, the same $100 net buys you ~133 BOUND tokens.
+- **odds**: BOUND / BREAK percentages derived from the live market state
+- **market cash-in display**: a more intuitive view of seeded capital plus trade flow
 
+These are related, but not identical. Odds come from the curve; the bottom card number is a product display choice.
 
-## Slippage
+## LP trade-off
 
-Every buy changes the pool ratio. Large trades move the price more. The router exposes a `minTokensOut` parameter on every buy — if the pool moves before your transaction lands and you'd receive fewer tokens, the transaction reverts.
+LPs earn fees, but they also underwrite the market.
 
+So there is always a trade-off:
 
-## Redemption price
+- small seed -> lower LP dollars at risk, poorer fills
+- large seed -> better fills, higher LP dollars at risk
 
-At settlement, the winner's redemption rate is:
+For very short markets, the wrong seed / trade-size combination can make LP outcomes swing hard.
 
-```
-redemptionRate = traderPool / winningTokenSupply
-```
+## Settlement intuition
 
-Where `traderPool = totalPool − seedPrincipal`. This means LPs' seed never participates in the winner/loser split — only the net trader USDC flows to winners.
+After expiry:
+
+- one side wins
+- winners redeem
+- LPs redeem the resolved vault proceeds
+
+LP return is not fixed principal plus fee. It depends on:
+
+- trade volume
+- fee capture
+- how one-sided or balanced market flow was
+- final payout dynamics at settlement
+
+See [Liquidity & Vaults](../how-it-works/liquidity-providing.md) and [Settlement on Somnia](../how-it-works/settlement.md) for the full payout flow.

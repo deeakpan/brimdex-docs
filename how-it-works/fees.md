@@ -1,40 +1,60 @@
 # Fees
 
-Brimdex has two fee contexts: the **primary market** (parimutuel buys) and the **orderbook** (peer-to-peer limit trades).
+Brimdex has two main fee surfaces:
 
+- **primary trading fees**
+- **orderbook fees**
 
-## Primary market fees (parimutuel)
+## Primary trading fee
 
-Every **buy** on the primary market pays **2% of the USDC you spend**:
+The default market fee is configurable and can change over time.
 
-| Recipient | Rate |
-|---|---|
-| Protocol treasury | 1.8% |
-| Seed LP vault (streaming) | 0.2% |
-| **Total** | **2.0%** |
+At a high level, the fee is split between:
 
-So about **98%** of what you spend becomes **net liquidity** in the pool after that fee. The **0.2%** portion **stabilizes and rewards** seed LPs over time; see [Liquidity providing](liquidity-providing.md).
+- LP incentives
+- staking incentives, when active
+- protocol revenue
 
+In the current fee model, Brimdex uses a base trading fee with a discounted path for eligible users. The exact live numbers should be read from the deployed fee config rather than hard-coded in front-end copy.
 
-## Orderbook fees
+## How fee splits work
 
-On the **orderbook**, each **matched** trade pays **0.5% of the matched notional** on the **buy side** and **0.5%** on the **sell side**. The app shows what you’re depositing or receiving so you can see fees before you confirm.
+The fee config controls:
 
+- standard fee rate
+- discounted fee rate
+- LP share
+- staker share
+- protocol share
 
-## Settlement
+This keeps fee policy upgradeable without forcing every market contract to carry its own immutable fee table.
 
-**No extra protocol skim** on the trader pool in the normal settlement path—the winning side redeems against that pool.
+## Orderbook fee
 
-**Rare edge case:** if essentially all activity is on one token side and that side **loses**, there may be no natural winners; in that situation protocol rules can route stranded trader funds to the treasury. This is exceptional.
+The orderbook uses its own matched-notional fee model.
 
+That means:
 
-## Fee summary
+- buyers pay a fee on matched notional
+- sellers pay a fee on matched notional
+- the orderbook fee path is separate from the main trading fee path
 
-| Action | Fee | Goes to |
-|---|---|---|
-| Primary buy (BOUND or BREAK) | 2% of spend | Treasury + LP vault stream |
-| Orderbook buy fill | 0.5% of matched notional | Protocol |
-| Orderbook sell fill | 0.5% of matched notional | Protocol |
-| Settlement / redeem / LP exit | **0%** protocol fee on those steps | — |
+## Why fees matter to LPs
 
-For contract-level detail, see [Builders overview](../builders/builder-overview.md) and the [orderbook](../contracts/brimdex-orderbook.md) / [market](../contracts/brimdex-market.md) references.
+LP return comes from a combination of:
+
+- fee capture
+- final market outcome
+- how balanced or one-sided flow was
+
+So LP economics are not "fixed APY." They are market-structure dependent.
+
+## Best practice for documentation
+
+When documenting production fee numbers:
+
+- quote the live config values
+- reference the live fee configuration
+- avoid old static copy from earlier market designs
+
+See [Fee Config](../contracts/brimdex-fee-config.md) for the technical specification.

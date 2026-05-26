@@ -1,47 +1,72 @@
-# The Orderbook
+# Orderbook
 
-The **orderbook** is the secondary market for trading BOUND and BREAK tokens before settlement. It works like a classic limit-order book: no new tokens are minted here—users trade with each other, and the app escrows USDC or tokens until a match.
+Brimdex includes an **orderbook** as the secondary market for BOUND and BREAK positions.
 
+The orderbook exists for one main reason: **early exit**.
 
-## Why an orderbook?
+The main Brimdex market gives you continuous buy access. The orderbook gives you a peer-to-peer venue to:
 
-Primary market buys are one-directional — you can buy but not sell back. If you want to exit early, you need a peer-to-peer mechanism. The orderbook lets you list your tokens at a price and have another user fill the order.
+- reduce a position
+- exit before expiry
+- trade at your own limit price
+- improve execution relative to the curve when there is resting liquidity
 
+## What the orderbook is
+
+The orderbook is:
+
+- per market
+- outcome-specific
+- price / size based
+- peer-to-peer
+
+It does not replace the main market. It sits next to it.
 
 ## How it works
 
-**Placing a sell order:**  
-You set a limit price and token amount. The app will ask you to **approve** the BOUND/BREAK tokens for the orderbook, then your tokens sit in **escrow** until the order fills or you cancel.
+### Sell order
 
-**Placing a buy order:**  
-You set a limit price and token amount. The app will ask you to **approve USDC** for the orderbook; your **USDC plus the buyer fee** is held in escrow until a match or cancel.
+You choose:
 
-**Matching:**
-The contract matches on price. An incoming sell hits bids at or above the limit price; an incoming buy hits asks at or below the limit price. Matches execute at the **resting order's price** (maker pricing).
+- the market
+- the side you want to sell
+- a limit price
+- a token amount
 
+Your outcome tokens are approved and escrowed until the order fills or you cancel it.
 
-## Fees
+### Buy order
 
-| Side | Fee |
-|---|---|
-| Buyer | 0.5% of matched notional |
-| Seller | 0.5% of matched notional |
+You choose:
 
-The UI shows **buyer** totals (notional plus fee) and **seller** proceeds (notional minus fee). Fees go to the protocol treasury.
+- the market
+- the side you want to buy
+- a limit price
+- a token amount
 
+Your USDC is approved and escrowed until matched or cancelled.
 
-## Per-market isolation
+### Matching
 
-Each market has its own order space within the orderbook. You cannot accidentally fill an order from a different market.
+Orders match on price compatibility:
 
+- incoming buys cross resting asks
+- incoming sells cross resting bids
+- execution happens at the resting order price
 
-## Cancelling orders
+## Why it matters
 
-Both buy and sell orders can be cancelled at any time before they are filled. Escrowed USDC or tokens are returned immediately.
+The orderbook is useful when:
 
+- you want to exit without pushing the LMSR curve
+- you want a tighter price than the live market-maker quote
+- you want to trade around a specific view rather than accept immediate execution
 
-## What the orderbook does NOT do
+## What it does not do
 
-- It does not mint tokens
-- It does not interact with pool prices — orderbook trades have no effect on the primary market price
-- It does not guarantee a match — if no counterparty exists at your price, your order sits open until filled or cancelled
+- it does not mint or settle the market
+- it does not replace Somnia settlement
+- it does not guarantee fills
+- it does not determine the market winner
+
+The winner still comes from the settlement flow on Somnia.
