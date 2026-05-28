@@ -7,8 +7,7 @@
 * [Supported Assets](supported-assets.md)
 * [Brand Assets](brand-assets.md)
 
-* Product
-  * [Product Overview](how-it-works/how-it-works-overview.md)
+* [PRODUCT](how-it-works/how-it-works-overview.md)
   * [Trading Overview](trading/trading-overview.md)
   * [AMM Trading](trading/amm-trading.md)
   * [Orderbook](trading/orderbook.md)
@@ -17,28 +16,24 @@
   * [Fees](how-it-works/fees.md)
   * [Hedging & Risk](how-it-works/hedging.md)
 
-* Protocol
-  * [Protocol Overview](protocol/protocol-overview.md)
+* [PROTOCOL](protocol/protocol-overview.md)
   * [BDX Token](protocol/bdx-token.md)
   * [Governance](protocol/governance.md)
   * [Staking](protocol/staking.md)
   * [Locking](protocol/locking.md)
   * [Audits](protocol/audits.md)
 
-* Key Concepts
-  * [Overview](key-concepts/key-concepts-overview.md)
+* [KEY CONCEPTS](key-concepts/key-concepts-overview.md)
   * [Bound vs Break](key-concepts/bound-and-break.md)
   * [Pricing & Liquidity](key-concepts/prices.md)
   * [Positions & Redemptions](key-concepts/positions-and-tokens.md)
   * [Market Lifecycle](key-concepts/market-lifecycle.md)
 
-* Architecture
-  * [Architecture Overview](architecture/architecture-overview.md)
+* [ARCHITECTURE](architecture/architecture-overview.md)
   * [Agents & Reactivity](architecture/agents-and-reactivity.md)
   * [Multichain with Stargate](architecture/multichain-and-stargate.md)
 
-* Contracts
-  * [Contract Overview](contracts/contract-overview.md)
+* [CONTRACTS](contracts/contract-overview.md)
   * [LMSR Stack Factory](contracts/brimdex-factory.md)
   * [LMSR Market Maker](contracts/brimdex-market.md)
   * [Stack Launch Vault](contracts/market-liquidity-vault.md)
@@ -47,8 +42,7 @@
   * [Fee Config](contracts/brimdex-fee-config.md)
   * [Feeds & Coordinators](contracts/feeds-and-coordinators.md)
 
-* Developers
-  * [Developer Overview](builders/builder-overview.md)
+* [DEVELOPER](builders/builder-overview.md)
   * [Market Data](builders/fetching-markets.md)
   * [API Usage](builders/api-usage.md)
   * [Positions & Redemptions](builders/reading-positions.md)
