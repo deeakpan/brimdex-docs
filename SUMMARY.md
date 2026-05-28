@@ -9,10 +9,9 @@
 
 * Product
   * [Product Overview](how-it-works/how-it-works-overview.md)
-  * Trading
-    * [Trading Overview](trading/trading-overview.md)
-    * [AMM Trading](trading/amm-trading.md)
-    * [Orderbook](trading/orderbook.md)
+  * [Trading Overview](trading/trading-overview.md)
+  * [AMM Trading](trading/amm-trading.md)
+  * [Orderbook](trading/orderbook.md)
   * [Liquidity & Vaults](how-it-works/liquidity-providing.md)
   * [Settlement on Somnia](how-it-works/settlement.md)
   * [Fees](how-it-works/fees.md)
@@ -22,9 +21,8 @@
   * [Protocol Overview](protocol/protocol-overview.md)
   * [BDX Token](protocol/bdx-token.md)
   * [Governance](protocol/governance.md)
-  * Participation
-    * [Staking](protocol/staking.md)
-    * [Locking](protocol/locking.md)
+  * [Staking](protocol/staking.md)
+  * [Locking](protocol/locking.md)
   * [Audits](protocol/audits.md)
 
 * Key Concepts
@@ -49,13 +47,11 @@
   * [Fee Config](contracts/brimdex-fee-config.md)
   * [Feeds & Coordinators](contracts/feeds-and-coordinators.md)
 
-* Builders
-  * [Builder Overview](builders/builder-overview.md)
-  * Data & APIs
-    * [Market Data](builders/fetching-markets.md)
-    * [API Usage](builders/api-usage.md)
-    * [Positions & Redemptions](builders/reading-positions.md)
-  * Integration
-    * [Trading Integration](builders/trading.md)
-    * [Events & Reactivity](builders/events-and-reactivity.md)
-    * [Contracts & ABIs](builders/contract-interfaces.md)
+* Developers
+  * [Developer Overview](builders/builder-overview.md)
+  * [Market Data](builders/fetching-markets.md)
+  * [API Usage](builders/api-usage.md)
+  * [Positions & Redemptions](builders/reading-positions.md)
+  * [Trading Integration](builders/trading.md)
+  * [Events & Reactivity](builders/events-and-reactivity.md)
+  * [Contracts & ABIs](builders/contract-interfaces.md)

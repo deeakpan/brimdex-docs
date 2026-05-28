@@ -4,22 +4,6 @@ This page covers the official **Brimdex brand asset pack** only.
 
 It is not a list of market assets, stock logos, or crypto icons. It is the reference for Brimdex's own visual identity.
 
-## Source of truth
-
-Use the repository asset bundle:
-
-- `brimdex_asset_pack/`
-- `brimdex_asset_pack/README.md`
-- copied docs assets under `docs/assets/brand/`
-
-That pack is the canonical source for:
-
-- logo files
-- icon variants
-- color references
-- typography guidance
-- social templates
-
 ## Included logo assets
 
 You can use these files directly from the docs:

@@ -19,4 +19,4 @@ The goal is intuition:
 | [Positions & Redemptions](positions-and-tokens.md) | What users hold before and after settlement |
 | [Market Lifecycle](market-lifecycle.md) | The launch, trade, expiry, and settlement path |
 
-For contract-level details, jump to [Contracts](../contracts/contract-overview.md). For integration work, use [Builders](../builders/builder-overview.md).
+For contract-level details, jump to [Contracts](../contracts/contract-overview.md). For integration work, use [Developers](../builders/builder-overview.md).

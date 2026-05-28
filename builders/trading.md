@@ -22,7 +22,7 @@ Because this is an LMSR / conditional-token style trade surface, the router uses
 
 ## Approval model
 
-Builders should:
+Developers should:
 
 1. approve the collateral token
 2. call the router with the desired trade shape
